@@ -5,8 +5,6 @@ export const getMessages = async (req, res) => {
     try {
         const id = req.userId;
 
-        const user = await User.findById(id);
-
         const { type, page, receiver } = req.body;
 
         const limit = 5;
@@ -14,9 +12,10 @@ export const getMessages = async (req, res) => {
 
         if (type === "group") {
             const messages = await Message.find({ type: "group" })
+                .populate("sender")
                 .skip(skip)
                 .limit(limit)
-                .sort({ createdAt: 1 });
+                .sort({ createdAt: -1 });
 
             res.json({
                 messages,
@@ -24,8 +23,8 @@ export const getMessages = async (req, res) => {
         } else {
             const messages = await Message.find({
                 $or: [
-                    { sender: user.userName, receiver },
-                    { sender: receiver, receiver: user.userName },
+                    { sender: id, receiver },
+                    { sender: receiver, receiver: id },
                 ],
             })
                 .skip(skip)
@@ -62,13 +61,22 @@ export const getChatData = async (req, res) => {
 export const getChats = async (req, res) => {
     try {
         const id = req.userId;
+
         const user = await User.findById(id);
-        const userName = user.userName;
+
+        const userId = user._id;
 
         const chats = await Message.aggregate([
             {
                 $match: {
-                    $or: [{ sender: userName }, { receiver: userName }],
+                    $and: [
+                        {
+                            $or: [{ sender: userId }, { receiver: userId }],
+                        },
+                        {
+                            type: { $ne: "group" },
+                        },
+                    ],
                 },
             },
             {
@@ -78,7 +86,7 @@ export const getChats = async (req, res) => {
                 $group: {
                     _id: {
                         $cond: {
-                            if: { $eq: ["$sender", userName] },
+                            if: { $eq: ["$sender", userId] },
                             then: "$receiver",
                             else: "$sender",
                         },
@@ -87,9 +95,33 @@ export const getChats = async (req, res) => {
                 },
             },
             {
+                $lookup: {
+                    from: "users",
+                    localField: "_id",
+                    foreignField: "_id",
+                    as: "receiverInfo",
+                },
+            },
+            {
+                $addFields: {
+                    receiverUserName: {
+                        $arrayElemAt: ["$receiverInfo.userName", 0],
+                    },
+                    receiverAvatar: {
+                        $arrayElemAt: ["$receiverInfo.avatar", 0],
+                    },
+                    receiverId: {
+                        $arrayElemAt: ["$receiverInfo._id", 0],
+                    },
+                },
+            },
+            {
                 $project: {
                     _id: 0,
-                    chatPartner: "$_id",
+                    chatPartner: 1,
+                    receiverUserName: 1,
+                    receiverAvatar: 1,
+                    receiverId: 1,
                     lastMessage: "$lastMessage.content",
                     timestamp: "$lastMessage.createdAt",
                 },

@@ -17,12 +17,9 @@ export default function Chat() {
     const [message, setMessage] = useState("");
     const [messages, setMessages] = useState([]);
     const [userData, setUserData] = useState({});
+    const [receiverData, setReceiverData] = useState({});
     const [page, setPage] = useState(1);
     const messagesEndRef = useRef(null);
-    const [isCallStarted, setIsCallStarted] = useState(false);
-    const localStreamRef = useRef(null);
-    const remoteStreamRef = useRef(null);
-    const peerConnectionRef = useRef(null);
 
     const getInfo = () => {
         api.get("/getMe", {
@@ -32,7 +29,23 @@ export default function Chat() {
                 setUserData(data);
             })
             .catch((e) => {
-                navigation("/login");
+                console.log(e);
+            });
+    };
+
+    const getReceiverData = () => {
+        api.post(
+            "/getReceiverData",
+            { id },
+            {
+                headers: { "Content-Type": "application/json" },
+            }
+        )
+            .then(({ data }) => {
+                setReceiverData(data);
+            })
+            .catch((e) => {
+                console.log(e);
             });
     };
 
@@ -45,9 +58,11 @@ export default function Chat() {
             }
         )
             .then(({ data }) => {
-                const newMessages =
-                    data.messages.length > 0 && data.messages.reverse();
-                setMessages([...messages, ...newMessages]);
+                if (data.messages.length > 0) {
+                    const newMessages =
+                        data.messages.length > 0 && data.messages.reverse();
+                    setMessages([...messages, ...newMessages]);
+                }
             })
             .catch((e) => {
                 console.log(e);
@@ -56,47 +71,38 @@ export default function Chat() {
 
     useEffect(() => {
         getInfo();
+        if (id !== "group") {
+            getReceiverData();
+        }
         getMessages();
     }, []);
 
     useEffect(() => {
         if (userData?.userName) {
-            const str = userData.userName + id;
-            const room = str.split("").sort().join("");
-            socket.emit("joinRoom", room, userData.userName);
+            socket.emit("joinRoom", userData._id, userData.userName);
         }
     }, [userData]);
 
     useEffect(() => {
         const handleMessage = (newMessage) => {
-            console.log("Received message", newMessage);
             setMessages((prevMessages) => [...prevMessages, newMessage]);
         };
-
-        socket.on("offer", handleOffer);
-        socket.on("answer", handleAnswer);
-        socket.on("ice-candidate", handleNewICECandidate);
 
         socket.on("message", handleMessage);
         return () => {
             socket.off("message", handleMessage);
-            socket.off("offer", handleOffer);
-            socket.off("answer", handleAnswer);
-            socket.off("ice-candidate", handleNewICECandidate);
         };
     }, []);
 
     const handleSend = async () => {
         const messageData = {
             content: message,
-            sender: userData.userName,
+            sender: userData._id,
             type: id === "group" ? "group" : "private",
-            receiver: id === "group" ? "group" : id,
+            receiver: id === "group" ? null : receiverData._id,
         };
 
         socket.emit("sendMessage", messageData);
-        // messageData._id = `${Math.random()}`;
-        // setMessages([...messages, messageData]);
         setMessage("");
     };
 
@@ -112,79 +118,6 @@ export default function Chat() {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, []);
 
-    const startCall = async () => {
-        peerConnectionRef.current = new RTCPeerConnection();
-
-        // Настройка потоков
-        const localStream = await navigator.mediaDevices.getUserMedia({
-            audio: true,
-        });
-        localStreamRef.current = localStream;
-        const remoteStream = new MediaStream();
-        remoteStreamRef.current = remoteStream;
-
-        localStream.getTracks().forEach((track) => {
-            peerConnectionRef.current.addTrack(track, localStream);
-        });
-
-        peerConnectionRef.current.ontrack = (event) => {
-            remoteStream.addTrack(event.track);
-        };
-
-        peerConnectionRef.current.onicecandidate = (event) => {
-            console.log("call", event);
-            // console.log("candidate", event.candidate);
-            if (event.candidate) {
-                socket.emit("ice-candidate", id);
-            }
-        };
-
-        const offer = await peerConnectionRef.current.createOffer();
-        await peerConnectionRef.current.setLocalDescription(offer);
-        socket.emit("offer", offer);
-
-        setIsCallStarted(true);
-    };
-
-    const handleOffer = async (offer) => {
-        console.log("offer", offer);
-        if (!peerConnectionRef.current) {
-            peerConnectionRef.current = new RTCPeerConnection();
-        }
-
-        await peerConnectionRef.current.setRemoteDescription(
-            new RTCSessionDescription(offer)
-        );
-
-        const answer = await peerConnectionRef.current.createAnswer();
-        await peerConnectionRef.current.setLocalDescription(answer);
-        socket.emit("answer", answer);
-    };
-
-    const handleAnswer = async (answer) => {
-        console.log("answer", answer);
-        await peerConnectionRef.current.setRemoteDescription(
-            new RTCSessionDescription(answer)
-        );
-    };
-
-    const handleNewICECandidate = (candidate) => {
-        console.log("Received ICE candidate:", candidate);
-        if (candidate) {
-            try {
-                peerConnectionRef.current.addIceCandidate(
-                    new RTCIceCandidate(candidate)
-                );
-            } catch (e) {
-                console.error("Failed to add ICE candidate:", e);
-            }
-        } else {
-            console.log(
-                "Received null ICE candidate, indicating end of candidate gathering."
-            );
-        }
-    };
-
     return (
         <>
             <div className="flex flex-col min-h-screen max-h-screen">
@@ -198,18 +131,31 @@ export default function Chat() {
                         <BackIcon className="w-5 h-5" />
                     </button>
                     <Link
-                        to={`/chatData/${id}`}
+                        to={`/chatData/${receiverData._id}`}
                         className="ml-3 flex items-center gap-x-3"
                     >
-                        <div className="h-10 w-10 rounded-full bg-blue-950"></div>
+                        {id === "group" ? (
+                            <div className="w-10 h-10 rounded-full bg-blue-800"></div>
+                        ) : (
+                            <div className="w-10 h-10 rounded-full overflow-hidden">
+                                <img
+                                    className="h-full"
+                                    src={`http://localhost:5002/uploads/${receiverData.avatar}`}
+                                />
+                            </div>
+                        )}
                         <div className="">
-                            <div>{id === "group" ? "Общий чат" : id}</div>
+                            <div>
+                                {id === "group"
+                                    ? "Общий чат"
+                                    : receiverData.userName}
+                            </div>
                             <div className="text-xs">Сейчас в сети</div>
                         </div>
                     </Link>
                     <button
                         className="ml-auto flex items-center justify-center p-2 hover:bg-gray-200 rounded-full"
-                        onClick={startCall}
+                        onClick={() => {}}
                     >
                         <PhoneIcon className="w-5 h-5" />
                     </button>
@@ -218,9 +164,39 @@ export default function Chat() {
                     {messages &&
                         messages.length > 0 &&
                         messages.map((item) => {
-                            return (
+                            if (item.type === "group") {
+                                return (
+                                    <div key={item._id}>
+                                        {item.sender._id === userData._id ? (
+                                            <div className="flex justify-end items-center gap-x-2">
+                                                <div className="py-px px-1 rounded-full text-sm border">
+                                                    {item.content}
+                                                </div>
+                                                <div className="w-7 h-7 rounded-full overflow-hidden">
+                                                    <img
+                                                        className="h-full"
+                                                        src={`http://localhost:5002/uploads/${item.sender.avatar}`}
+                                                    />
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="flex items-center gap-x-2">
+                                                <div className="w-7 h-7 rounded-full overflow-hidden">
+                                                    <img
+                                                        className="h-full"
+                                                        src={`http://localhost:5002/uploads/${item.sender.avatar}`}
+                                                    />
+                                                </div>
+                                                <div className="py-px px-1 rounded-full text-sm border">
+                                                    {item.content}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            } else {
                                 <div key={item._id}>
-                                    {item.sender === userData.userName ? (
+                                    {item.sender === userData._id ? (
                                         <div className="flex justify-end items-center gap-x-2">
                                             <div className="py-px px-1 rounded-full text-sm border">
                                                 {item.content}
@@ -237,7 +213,7 @@ export default function Chat() {
                                             <div className="w-7 h-7 rounded-full overflow-hidden">
                                                 <img
                                                     className="h-full"
-                                                    src={`http://localhost:5002/uploads/${userData.avatar}`}
+                                                    src={`http://localhost:5002/uploads/${receiverData.avatar}`}
                                                 />
                                             </div>
                                             <div className="py-px px-1 rounded-full text-sm border">
@@ -245,36 +221,13 @@ export default function Chat() {
                                             </div>
                                         </div>
                                     )}
-                                </div>
-                            );
+                                </div>;
+                            }
                         })}
                     <div ref={messagesEndRef} /> {/* Scroll anchor */}
                 </div>
-                <div>
-                    <audio
-                        ref={(audio) =>
-                            audio && (audio.srcObject = localStreamRef.current)
-                        }
-                        autoPlay
-                        muted
-                    />
-                    <audio
-                        ref={(audio) =>
-                            audio && (audio.srcObject = remoteStreamRef.current)
-                        }
-                        autoPlay
-                    />
-                </div>
                 <div className="flex items-center px-5 py-3 rounded-t-md border-t bg-gray-900 bg-opacity-30">
-                    <button
-                        className="text-lg"
-                        onClick={() => {
-                            setSendFileButton(!sendFileButton);
-                        }}
-                    >
-                        {sendFileButton ? "x" : "+"}
-                    </button>
-                    <div className="flex-1 ml-5">
+                    <div className="flex-1">
                         <input
                             className="min-w-full outline-none px-2 py-px rounded-full text-sm"
                             value={message}
@@ -285,18 +238,13 @@ export default function Chat() {
                         />
                     </div>
                     <div className="ml-3">
-                        {message === "" ? (
-                            <button className="flex items-center justify-center w-7 h-7 rounded-full bg-purple-900 bg-opacity-50">
-                                <MicroPhoneIcon className="w-5 h-5" />
-                            </button>
-                        ) : (
-                            <button
-                                className="flex items-center justify-center w-7 h-7 rounded-full bg-purple-900 bg-opacity-50"
-                                onClick={handleSend}
-                            >
-                                <SendIcon className="w-5 h-5" />
-                            </button>
-                        )}
+                        <button
+                            className="flex items-center justify-center w-7 h-7 rounded-full bg-purple-900 bg-opacity-50"
+                            onClick={handleSend}
+                            disabled={message === ""}
+                        >
+                            <SendIcon className="w-5 h-5" />
+                        </button>
                     </div>
                 </div>
             </div>

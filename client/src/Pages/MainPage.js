@@ -41,6 +41,7 @@ export default function MainPage() {
         })
             .then(({ data }) => {
                 setChats(data.chats);
+                console.log(data);
             })
             .catch((e) => {
                 console.log(e);
@@ -75,16 +76,26 @@ export default function MainPage() {
                     {chats &&
                         chats.length > 0 &&
                         chats.map((item) => {
-                            if (item.chatPartner) {
+                            if (item.receiverUserName !== "group") {
                                 return (
-                                    <div key={item.chatPartner} className="">
+                                    <div
+                                        key={item.receiverUserName}
+                                        className=""
+                                    >
                                         <Link
-                                            to={`/chat/${item.chatPartner}`}
+                                            to={`/chat/${item.receiverId}`}
                                             className="flex items-center h-[80px] py-2 px-4 border-b border-b-gray-600"
                                         >
-                                            <div className="h-10 w-10 rounded-full bg-blue-950"></div>
+                                            <div className="w-10 h-10 rounded-full overflow-hidden">
+                                                <img
+                                                    className="h-full"
+                                                    src={`http://localhost:5002/uploads/${item.receiverAvatar}`}
+                                                />
+                                            </div>
                                             <div className="ml-3">
-                                                <div>{item.chatPartner}</div>
+                                                <div>
+                                                    {item.receiverUserName}
+                                                </div>
                                                 <div>{item.lastMessage}</div>
                                             </div>
                                         </Link>

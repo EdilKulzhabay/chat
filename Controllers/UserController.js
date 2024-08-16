@@ -167,6 +167,23 @@ export const getMe = async (req, res) => {
     }
 };
 
+export const getReceiverData = async (req, res) => {
+    try {
+        const { id } = req.body;
+
+        const user = await User.findById(id);
+
+        const { password, ...userData } = user._doc;
+
+        res.json(userData);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            message: "Что-то пошло не так",
+        });
+    }
+};
+
 export const changePassword = async (req, res) => {
     try {
         const id = req.userId;

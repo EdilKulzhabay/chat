@@ -58,11 +58,15 @@ io.on("connection", (socket) => {
         await newMessage.save();
 
         if (message.type === "group") {
-            io.emit("message", newMessage);
+            const populatedMessage = await Message.findById(
+                newMessage._id
+            ).populate("sender");
+            io.emit("message", populatedMessage);
         } else {
-            const str = message.receiver + message.sender;
-            const room = str.split("").sort().join("");
-            socket.nsp.to(room).emit("message", newMessage);
+            socket.nsp
+                .to(message.sender)
+                .to(message.receiver)
+                .emit("message", newMessage);
         }
     });
 
@@ -94,6 +98,7 @@ io.on("connection", (socket) => {
 ///////USER
 app.get("/getMe", checkAuth, UserController.getMe);
 app.get("/getUsers", checkAuth, UserController.getUsers);
+app.post("/getReceiverData", UserController.getReceiverData);
 app.post("/register", UserController.register);
 app.post("/login", UserController.login);
 app.post("/upload", upload.single("image"), checkAuth, UserController.upload);

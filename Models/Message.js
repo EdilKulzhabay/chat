@@ -6,13 +6,15 @@ const MessageSchema = new mongoose.Schema(
             type: String,
         },
         sender: {
-            type: String,
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
         },
         type: {
             type: String,
         },
         receiver: {
-            type: String,
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
         },
         readBy: [String],
     },

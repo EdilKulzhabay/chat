@@ -65,7 +65,7 @@ export default function ChatData() {
                                     className="py-2 px-1 border-y "
                                 >
                                     <Link
-                                        to={`/chat/${item.userName}`}
+                                        to={`/chat/${item._id}`}
                                         className="flex items-center"
                                     >
                                         <div className="w-10 h-10 rounded-full overflow-hidden">
