@@ -56,20 +56,13 @@ io.on("connection", (socket) => {
     socket.on("sendMessage", async (message) => {
         const newMessage = new Message(message);
         await newMessage.save();
-        const str = message.receiver + message.sender;
-        const room = str.split("").sort().join("");
-        console.log(
-            "user ",
-            message.sender,
-            " form room ",
-            room,
-            " send message"
-        );
 
         if (message.type === "group") {
             io.emit("message", newMessage);
         } else {
-            socket.to(room).emit("message", newMessage);
+            const str = message.receiver + message.sender;
+            const room = str.split("").sort().join("");
+            socket.nsp.to(room).emit("message", newMessage);
         }
     });
 
