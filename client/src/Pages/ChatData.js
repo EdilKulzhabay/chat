@@ -71,7 +71,7 @@ export default function ChatData() {
                                         <div className="w-10 h-10 rounded-full overflow-hidden">
                                             <img
                                                 className="h-full"
-                                                src={`http://localhost:5002/uploads/${item.avatar}`}
+                                                src={`${process.env.REACT_APP_PORT}/uploads/${item.avatar}`}
                                             />
                                         </div>
                                         <div className="ml-3">

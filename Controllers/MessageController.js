@@ -7,7 +7,7 @@ export const getMessages = async (req, res) => {
 
         const { type, page, receiver } = req.body;
 
-        const limit = 5;
+        const limit = 20;
         const skip = (page - 1) * limit;
 
         if (type === "group") {

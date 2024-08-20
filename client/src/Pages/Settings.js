@@ -65,7 +65,7 @@ export default function Settings() {
                         {userData.avatar && userData.avatar !== "" ? (
                             <img
                                 className="h-full"
-                                src={`http://localhost:5002/uploads/${userData.avatar}`}
+                                src={`${process.env.REACT_APP_PORT}/uploads/${userData.avatar}`}
                             />
                         ) : (
                             <UserIcon className="w-[90px] h-[90px]" />

@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../api";
-import Chat from "../Components/Chat";
 import ChatIcon from "../Icons/ChatIcon";
 import SettingsIcon from "../Icons/SettingsIcon";
+import socket from "../socket";
 
 export default function MainPage() {
     const [userData, setUserData] = useState({});
     const navigation = useNavigate();
+    const [canPlayAudio, setCanPlayAudio] = useState(false);
     const [users, setUsers] = useState([]);
     const [chats, setChats] = useState([]);
+    const audio = new Audio("/asd.mp3");
 
     const getInfo = () => {
         api.get("/getMe", {
@@ -47,6 +49,28 @@ export default function MainPage() {
                 console.log(e);
             });
     };
+
+    useEffect(() => {
+        const enableAudio = () => setCanPlayAudio(true);
+
+        document.addEventListener("click", enableAudio);
+        socket.on("updateMessages", () => {
+            getChats();
+            audio.play().catch((error) => {
+                console.error("Failed to play audio:", error);
+            });
+        });
+        return () => {
+            socket.off("updateMessages", getChats);
+            document.removeEventListener("click", enableAudio);
+        };
+    }, []);
+
+    useEffect(() => {
+        if (userData?.userName) {
+            socket.emit("joinRoom", userData._id, userData.userName);
+        }
+    }, [userData]);
 
     useEffect(() => {
         getInfo();
@@ -89,7 +113,7 @@ export default function MainPage() {
                                             <div className="w-10 h-10 rounded-full overflow-hidden">
                                                 <img
                                                     className="h-full"
-                                                    src={`http://localhost:5002/uploads/${item.receiverAvatar}`}
+                                                    src={`${process.env.REACT_APP_PORT}/uploads/${item.receiverAvatar}`}
                                                 />
                                             </div>
                                             <div className="ml-3">

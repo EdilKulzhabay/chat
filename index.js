@@ -5,7 +5,8 @@ import mongoose from "mongoose";
 import cors from "cors";
 import multer from "multer";
 import cookieParser from "cookie-parser";
-import { v4 as uuidV4 } from "uuid";
+import ACTIONS from "./client/src/socket/actions.js";
+import { validate, version } from "uuid";
 import "dotenv/config";
 
 import { MessageController, UserController } from "./Controllers/index.js";
@@ -17,7 +18,7 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(
     cors({
-        // origin: "http://192.168.0.13:3000", // Замените на реальный домен клиента
+        //origin: "http://192.168.0.11:3000", // Замените на реальный домен клиента
         origin: "http://localhost:3000",
         credentials: true,
     })
@@ -53,6 +54,19 @@ global.io = new Server(server, {
 });
 
 io.on("connection", (socket) => {
+    function getClientRooms() {
+        const { rooms } = io.sockets.adapter;
+        return Array.from(rooms.keys()).filter(
+            (roomID) => validate(roomID) && version(roomID) === 4
+        );
+    }
+
+    function shareRoomsInfo() {
+        io.emit(ACTIONS.SHARE_ROOMS, {
+            rooms: getClientRooms(),
+        });
+    }
+
     socket.on("sendMessage", async (message) => {
         const newMessage = new Message(message);
         await newMessage.save();
@@ -62,32 +76,86 @@ io.on("connection", (socket) => {
                 newMessage._id
             ).populate("sender");
             io.emit("message", populatedMessage);
+            io.emit("updateMessages");
         } else {
             socket.nsp
                 .to(message.sender)
                 .to(message.receiver)
                 .emit("message", newMessage);
+            socket.to(message.receiver).emit("updateMessages");
         }
     });
 
-    socket.on("joinRoom", (room, userName) => {
-        socket.join(room);
-        console.log("user ", userName, " joined room ", room);
-    });
+    shareRoomsInfo();
 
-    socket.on("offer", (offer) => {
-        socket.broadcast.emit("offer", offer);
-    });
+    socket.on(ACTIONS.JOIN, (config) => {
+        const { room: roomID } = config;
+        const { rooms: joinedRooms } = socket;
 
-    socket.on("answer", (answer) => {
-        socket.broadcast.emit("answer", answer);
-    });
-
-    socket.on("ice-candidate", (candidate) => {
-        console.log("candidate", candidate);
-        if (candidate) {
-            socket.broadcast.emit("ice-candidate", candidate);
+        if (Array.from(joinedRooms).includes(roomID)) {
+            return console.warn(`Already joined to ${roomID}`);
         }
+
+        const clients = Array.from(io.sockets.adapter.rooms.get(roomID) || []);
+
+        clients.forEach((clientID) => {
+            io.to(clientID).emit(ACTIONS.ADD_PEER, {
+                peerID: socket.id,
+                createOffer: false,
+            });
+
+            socket.emit(ACTIONS.ADD_PEER, {
+                peerID: clientID,
+                createOffer: true,
+            });
+        });
+
+        socket.join(roomID);
+        shareRoomsInfo();
+
+        function leaveRoom() {
+            const { rooms } = socket;
+
+            Array.from(rooms)
+                // LEAVE ONLY CLIENT CREATED ROOM
+                //   .filter(roomID => validate(roomID) && version(roomID) === 4)
+                .forEach((roomID) => {
+                    const clients = Array.from(
+                        io.sockets.adapter.rooms.get(roomID) || []
+                    );
+
+                    clients.forEach((clientID) => {
+                        io.to(clientID).emit(ACTIONS.REMOVE_PEER, {
+                            peerID: socket.id,
+                        });
+
+                        socket.emit(ACTIONS.REMOVE_PEER, {
+                            peerID: clientID,
+                        });
+                    });
+
+                    socket.leave(roomID);
+                });
+
+            shareRoomsInfo();
+        }
+
+        socket.on(ACTIONS.LEAVE, leaveRoom);
+        socket.on("disconnecting", leaveRoom);
+
+        socket.on(ACTIONS.RELAY_SDP, ({ peerID, sessionDescription }) => {
+            io.to(peerID).emit(ACTIONS.SESSION_DESCRIPTION, {
+                peerID: socket.id,
+                sessionDescription,
+            });
+        });
+
+        socket.on(ACTIONS.RELAY_ICE, ({ peerID, iceCandidate }) => {
+            io.to(peerID).emit(ACTIONS.ICE_CANDIDATE, {
+                peerID: socket.id,
+                iceCandidate,
+            });
+        });
     });
 
     socket.on("disconnect", () => {
@@ -108,6 +176,10 @@ app.post("/logOut", UserController.logOut);
 ///////MESSAGE
 app.get("/getChats", checkAuth, MessageController.getChats);
 app.post("/getMessages", checkAuth, MessageController.getMessages);
+
+app.get("/edil", async (req, res) => {
+    res.json({ Name: "edil" });
+});
 
 server.listen(process.env.PORT, () => {
     console.log(`Server is running on port ${process.env.PORT}`);

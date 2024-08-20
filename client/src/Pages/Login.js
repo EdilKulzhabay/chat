@@ -34,8 +34,13 @@ export default function Login() {
                 setErrorText(false);
             })
             .catch((e) => {
-                setErrorText(true);
-                setEt(e.response.data.message);
+                if (e.response && e.response.data) {
+                    setErrorText(true);
+                    setEt(e.response.data.message);
+                } else {
+                    setErrorText(true);
+                    setEt("Неизвестная ошибка. Попробуйте еще раз.");
+                }
             });
     };
 

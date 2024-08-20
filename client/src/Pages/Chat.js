@@ -2,13 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import BackIcon from "../Icons/BackIcon";
 import PhoneIcon from "../Icons/PhoneIcon";
-import MicroPhoneIcon from "../Icons/MicroPhoneIcon";
 import SendIcon from "../Icons/SendIcon";
 import api from "../api";
-import { io } from "socket.io-client";
-
-const socket = io("http://localhost:5002");
-// const socket = io("http://192.168.0.13:5002");
+import socket from "../socket";
 
 export default function Chat() {
     const { id } = useParams();
@@ -131,7 +127,7 @@ export default function Chat() {
                         <BackIcon className="w-5 h-5" />
                     </button>
                     <Link
-                        to={`/chatData/${receiverData._id}`}
+                        to={`/chatData/${id}`}
                         className="ml-3 flex items-center gap-x-3"
                     >
                         {id === "group" ? (
@@ -140,7 +136,7 @@ export default function Chat() {
                             <div className="w-10 h-10 rounded-full overflow-hidden">
                                 <img
                                     className="h-full"
-                                    src={`http://localhost:5002/uploads/${receiverData.avatar}`}
+                                    src={`${process.env.REACT_APP_PORT}/uploads/${receiverData.avatar}`}
                                 />
                             </div>
                         )}
@@ -175,7 +171,7 @@ export default function Chat() {
                                                 <div className="w-7 h-7 rounded-full overflow-hidden">
                                                     <img
                                                         className="h-full"
-                                                        src={`http://localhost:5002/uploads/${item.sender.avatar}`}
+                                                        src={`${process.env.REACT_APP_PORT}/uploads/${item.sender.avatar}`}
                                                     />
                                                 </div>
                                             </div>
@@ -184,7 +180,7 @@ export default function Chat() {
                                                 <div className="w-7 h-7 rounded-full overflow-hidden">
                                                     <img
                                                         className="h-full"
-                                                        src={`http://localhost:5002/uploads/${item.sender.avatar}`}
+                                                        src={`${process.env.REACT_APP_PORT}/uploads/${item.sender.avatar}`}
                                                     />
                                                 </div>
                                                 <div className="py-px px-1 rounded-full text-sm border">
@@ -195,33 +191,35 @@ export default function Chat() {
                                     </div>
                                 );
                             } else {
-                                <div key={item._id}>
-                                    {item.sender === userData._id ? (
-                                        <div className="flex justify-end items-center gap-x-2">
-                                            <div className="py-px px-1 rounded-full text-sm border">
-                                                {item.content}
+                                return (
+                                    <div key={item._id}>
+                                        {item.sender === userData._id ? (
+                                            <div className="flex justify-end items-center gap-x-2">
+                                                <div className="py-px px-1 rounded-full text-sm border">
+                                                    {item.content}
+                                                </div>
+                                                <div className="w-7 h-7 rounded-full overflow-hidden">
+                                                    <img
+                                                        className="h-full"
+                                                        src={`${process.env.REACT_APP_PORT}/uploads/${userData.avatar}`}
+                                                    />
+                                                </div>
                                             </div>
-                                            <div className="w-7 h-7 rounded-full overflow-hidden">
-                                                <img
-                                                    className="h-full"
-                                                    src={`http://localhost:5002/uploads/${userData.avatar}`}
-                                                />
+                                        ) : (
+                                            <div className="flex items-center gap-x-2">
+                                                <div className="w-7 h-7 rounded-full overflow-hidden">
+                                                    <img
+                                                        className="h-full"
+                                                        src={`${process.env.REACT_APP_PORT}/uploads/${receiverData.avatar}`}
+                                                    />
+                                                </div>
+                                                <div className="py-px px-1 rounded-full text-sm border">
+                                                    {item.content}
+                                                </div>
                                             </div>
-                                        </div>
-                                    ) : (
-                                        <div className="flex items-center gap-x-2">
-                                            <div className="w-7 h-7 rounded-full overflow-hidden">
-                                                <img
-                                                    className="h-full"
-                                                    src={`http://localhost:5002/uploads/${receiverData.avatar}`}
-                                                />
-                                            </div>
-                                            <div className="py-px px-1 rounded-full text-sm border">
-                                                {item.content}
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>;
+                                        )}
+                                    </div>
+                                );
                             }
                         })}
                     <div ref={messagesEndRef} /> {/* Scroll anchor */}
