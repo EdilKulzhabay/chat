@@ -14,7 +14,12 @@ export default function AddUsers() {
             {
                 headers: { "Content-Type": "application/json" },
             }
-        );
+        ).then(() => {
+            setUserName("");
+            setFullName("");
+            setPassword("");
+            setPhone("");
+        });
     };
 
     return (
