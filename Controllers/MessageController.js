@@ -13,8 +13,8 @@ export const getMessages = async (req, res) => {
         if (type === "group") {
             const messages = await Message.find({ type: "group" })
                 .populate("sender")
-                .skip(skip)
-                .limit(limit)
+                // .skip(skip)
+                // .limit(limit)
                 .sort({ createdAt: -1 });
 
             res.json({
@@ -27,8 +27,8 @@ export const getMessages = async (req, res) => {
                     { sender: receiver, receiver: id },
                 ],
             })
-                .skip(skip)
-                .limit(limit)
+                // .skip(skip)
+                // .limit(limit)
                 .sort({ createdAt: -1 });
 
             res.json({

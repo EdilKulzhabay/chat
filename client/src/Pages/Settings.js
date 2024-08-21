@@ -1,11 +1,15 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Cookies from "js-cookie";
 import api from "../api";
+import { AuthContext } from "../AuthContext";
 import Hr from "../Components/Hr";
 import BackIcon from "../Icons/BackIcon";
 import UserIcon from "../Icons/UserIcon";
+import CallComponent from "../Components/CallComponent";
 
 export default function Settings() {
+    const auth = useContext(AuthContext);
     const [userData, setUserData] = useState({});
     const inputFileRef = useRef(null);
     const navigation = useNavigate();
@@ -18,7 +22,7 @@ export default function Settings() {
                 setUserData(data);
             })
             .catch((e) => {
-                console.log("sldfsldkfmlsdk");
+                navigation("/login");
             });
     };
 
@@ -45,8 +49,15 @@ export default function Settings() {
         }
     };
 
+    const logOut = () => {
+        auth.logout();
+        Cookies.remove("refreshToken");
+        navigation("/login");
+    };
+
     return (
         <>
+            <CallComponent />
             <div className="flex items-center gap-x-3 px-3 py-4">
                 <button
                     className="flex items-center justify-center p-2 hover:bg-gray-200 rounded-full"
@@ -57,6 +68,14 @@ export default function Settings() {
                     <BackIcon className="w-5 h-5" />
                 </button>
                 <div className="text-xl font-medium">Настройки</div>
+                <div className="ml-auto">
+                    <button
+                        className="py-1 px-2 rounded-lg bg-red-800 text-white font-medium"
+                        onClick={logOut}
+                    >
+                        Выйти
+                    </button>
+                </div>
             </div>
             <Hr />
             <div className="mt-5 flex flex-col items-center justify-center">

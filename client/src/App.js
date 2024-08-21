@@ -2,6 +2,7 @@ import { RouterProvider } from "react-router-dom";
 import { router } from "./routes";
 import { AuthContext } from "./AuthContext";
 import { useAuth } from "./auth.hook";
+import PhoneIcon from "./Icons/PhoneIcon";
 
 function App() {
     const { token, login, logout } = useAuth();

@@ -73,7 +73,7 @@ export default function Login() {
         <div className="min-h-screen flex justify-center items-center">
             <div className="-mt-10">
                 <div className="text-4xl text-purple-900 font-semibold text-center">
-                    CHAT
+                    VOCA
                 </div>
                 <div className="mt-3 text-sm text-[#606B85] text-center">
                     Пожалуйста, войдите в свой аккаунт и начните работу

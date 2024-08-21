@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import api from "../api";
+import CallComponent from "../Components/CallComponent";
 import Hr from "../Components/Hr";
 import BackIcon from "../Icons/BackIcon";
-import PhoneIcon from "../Icons/PhoneIcon";
-import SearchIcon from "../Icons/SearchIcon";
 
 export default function ChatData() {
     const { id } = useParams();
@@ -29,8 +28,18 @@ export default function ChatData() {
         }
     }, []);
 
+    function getInitials(fullName) {
+        if (!fullName) return "";
+        const names = fullName.split(" ");
+        const initials = names
+            .map((name) => name.charAt(0).toUpperCase())
+            .join("");
+        return initials;
+    }
+
     return (
         <>
+            <CallComponent />
             <div className="flex items-center gap-x-3 px-3 py-4">
                 <button
                     className="flex items-center justify-center p-2 hover:bg-gray-200 rounded-full"
@@ -40,21 +49,10 @@ export default function ChatData() {
                 >
                     <BackIcon className="w-5 h-5" />
                 </button>
-                <div className="text-xl font-medium">
-                    {id === "group" ? "Группа" : ""}
-                </div>
             </div>
             <Hr />
-            <div className="flex items-center justify-around mt-3">
-                <div className="flex items-center justify-center rounded-lg border p-5">
-                    <PhoneIcon className="w-5 h-5" />
-                </div>
-                <div className="flex items-center justify-center rounded-lg border p-5">
-                    <SearchIcon className="w-5 h-5" />
-                </div>
-            </div>
             <div className="mt-4 px-3">
-                <div className="text-lg font-medium">Участники</div>
+                <div className="text-2xl font-medium">Участники</div>
                 <div className="mt-3">
                     {users &&
                         users.length > 0 &&
@@ -69,10 +67,18 @@ export default function ChatData() {
                                         className="flex items-center"
                                     >
                                         <div className="w-10 h-10 rounded-full overflow-hidden">
-                                            <img
-                                                className="h-full"
-                                                src={`${process.env.REACT_APP_PORT}/uploads/${item.avatar}`}
-                                            />
+                                            {item.avatar ? (
+                                                <img
+                                                    className="h-full"
+                                                    src={`${process.env.REACT_APP_PORT}/uploads/${item.avatar}`}
+                                                />
+                                            ) : (
+                                                <div className="w-10 h-10 rounded-full border flex items-center justify-center">
+                                                    {getInitials(
+                                                        item?.fullName
+                                                    )}
+                                                </div>
+                                            )}
                                         </div>
                                         <div className="ml-3">
                                             <div>{item.userName}</div>

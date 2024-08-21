@@ -5,17 +5,19 @@ import PhoneIcon from "../Icons/PhoneIcon";
 import SendIcon from "../Icons/SendIcon";
 import api from "../api";
 import socket from "../socket";
+import { v4 } from "uuid";
+import CallComponent from "../Components/CallComponent";
 
 export default function Chat() {
     const { id } = useParams();
     const navigation = useNavigate();
-    const [sendFileButton, setSendFileButton] = useState(false);
     const [message, setMessage] = useState("");
     const [messages, setMessages] = useState([]);
     const [userData, setUserData] = useState({});
     const [receiverData, setReceiverData] = useState({});
     const [page, setPage] = useState(1);
     const messagesEndRef = useRef(null);
+    const [needScroll, setNeedScroll] = useState(true);
 
     const getInfo = () => {
         api.get("/getMe", {
@@ -111,11 +113,36 @@ export default function Chat() {
     };
 
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, []);
+        if (needScroll && messages.length > 0) {
+            messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+            setNeedScroll(false);
+        }
+    }, [messages]);
+
+    function getInitials(fullName) {
+        if (!fullName) return "";
+        const names = fullName.split(" ");
+        const initials = names
+            .map((name) => name.charAt(0).toUpperCase())
+            .join("");
+        return initials;
+    }
+
+    const startCall = () => {
+        const recId = receiverData._id;
+        const link = `/call/${v4()}`;
+        console.log(recId);
+        socket.emit("startPrivateCall", {
+            recId: recId,
+            link: link,
+        });
+
+        navigation(link);
+    };
 
     return (
         <>
+            <CallComponent />
             <div className="flex flex-col min-h-screen max-h-screen">
                 <div className="flex items-center min-w-full px-3 py-4 border-b border-gray-600">
                     <button
@@ -126,18 +153,21 @@ export default function Chat() {
                     >
                         <BackIcon className="w-5 h-5" />
                     </button>
-                    <Link
-                        to={`/chatData/${id}`}
-                        className="ml-3 flex items-center gap-x-3"
-                    >
+                    <div className="ml-3 flex items-center gap-x-3">
                         {id === "group" ? (
                             <div className="w-10 h-10 rounded-full bg-blue-800"></div>
                         ) : (
                             <div className="w-10 h-10 rounded-full overflow-hidden">
-                                <img
-                                    className="h-full"
-                                    src={`${process.env.REACT_APP_PORT}/uploads/${receiverData.avatar}`}
-                                />
+                                {receiverData.avatar ? (
+                                    <img
+                                        className="h-full"
+                                        src={`${process.env.REACT_APP_PORT}/uploads/${receiverData.avatar}`}
+                                    />
+                                ) : (
+                                    <div className="w-10 h-10 rounded-full border flex items-center justify-center">
+                                        {getInitials(receiverData?.fullName)}
+                                    </div>
+                                )}
                             </div>
                         )}
                         <div className="">
@@ -148,40 +178,58 @@ export default function Chat() {
                             </div>
                             <div className="text-xs">Сейчас в сети</div>
                         </div>
-                    </Link>
+                    </div>
                     <button
                         className="ml-auto flex items-center justify-center p-2 hover:bg-gray-200 rounded-full"
-                        onClick={() => {}}
+                        onClick={startCall}
                     >
                         <PhoneIcon className="w-5 h-5" />
                     </button>
                 </div>
-                <div className="flex-1 flex flex-col gap-y-3 pb-2 justify-end overflow-scroll">
+                <div className="flex-1 space-y-3 py-3 overflow-y-scroll">
                     {messages &&
                         messages.length > 0 &&
                         messages.map((item) => {
                             if (item.type === "group") {
                                 return (
-                                    <div key={item._id}>
+                                    <div key={item._id} className="">
                                         {item.sender._id === userData._id ? (
                                             <div className="flex justify-end items-center gap-x-2">
                                                 <div className="py-px px-1 rounded-full text-sm border">
                                                     {item.content}
                                                 </div>
                                                 <div className="w-7 h-7 rounded-full overflow-hidden">
-                                                    <img
-                                                        className="h-full"
-                                                        src={`${process.env.REACT_APP_PORT}/uploads/${item.sender.avatar}`}
-                                                    />
+                                                    {item.sender.avatar ? (
+                                                        <img
+                                                            className="h-full"
+                                                            src={`${process.env.REACT_APP_PORT}/uploads/${item.sender.avatar}`}
+                                                        />
+                                                    ) : (
+                                                        <div className="w-7 h-7 rounded-full border flex items-center justify-center">
+                                                            {getInitials(
+                                                                item?.sender
+                                                                    ?.fullName
+                                                            )}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         ) : (
                                             <div className="flex items-center gap-x-2">
                                                 <div className="w-7 h-7 rounded-full overflow-hidden">
-                                                    <img
-                                                        className="h-full"
-                                                        src={`${process.env.REACT_APP_PORT}/uploads/${item.sender.avatar}`}
-                                                    />
+                                                    {item.sender.avatar ? (
+                                                        <img
+                                                            className="h-full"
+                                                            src={`${process.env.REACT_APP_PORT}/uploads/${item.sender.avatar}`}
+                                                        />
+                                                    ) : (
+                                                        <div className="w-7 h-7 rounded-full border flex items-center justify-center">
+                                                            {getInitials(
+                                                                item?.sender
+                                                                    ?.fullName
+                                                            )}
+                                                        </div>
+                                                    )}
                                                 </div>
                                                 <div className="py-px px-1 rounded-full text-sm border">
                                                     {item.content}
@@ -199,6 +247,18 @@ export default function Chat() {
                                                     {item.content}
                                                 </div>
                                                 <div className="w-7 h-7 rounded-full overflow-hidden">
+                                                    {userData.avatar ? (
+                                                        <img
+                                                            className="h-full"
+                                                            src={`${process.env.REACT_APP_PORT}/uploads/${userData.avatar}`}
+                                                        />
+                                                    ) : (
+                                                        <div className="w-7 h-7 rounded-full border flex items-center justify-center">
+                                                            {getInitials(
+                                                                userData?.fullName
+                                                            )}
+                                                        </div>
+                                                    )}
                                                     <img
                                                         className="h-full"
                                                         src={`${process.env.REACT_APP_PORT}/uploads/${userData.avatar}`}
@@ -208,10 +268,18 @@ export default function Chat() {
                                         ) : (
                                             <div className="flex items-center gap-x-2">
                                                 <div className="w-7 h-7 rounded-full overflow-hidden">
-                                                    <img
-                                                        className="h-full"
-                                                        src={`${process.env.REACT_APP_PORT}/uploads/${receiverData.avatar}`}
-                                                    />
+                                                    {receiverData.avatar ? (
+                                                        <img
+                                                            className="h-full"
+                                                            src={`${process.env.REACT_APP_PORT}/uploads/${receiverData.avatar}`}
+                                                        />
+                                                    ) : (
+                                                        <div className="w-7 h-7 rounded-full border flex items-center justify-center">
+                                                            {getInitials(
+                                                                receiverData?.fullName
+                                                            )}
+                                                        </div>
+                                                    )}
                                                 </div>
                                                 <div className="py-px px-1 rounded-full text-sm border">
                                                     {item.content}

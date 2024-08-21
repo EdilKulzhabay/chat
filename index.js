@@ -18,7 +18,7 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(
     cors({
-        //origin: "http://192.168.0.11:3000", // Замените на реальный домен клиента
+        //origin: "https://voca.kz",
         origin: "http://localhost:3000",
         credentials: true,
     })
@@ -67,6 +67,11 @@ io.on("connection", (socket) => {
         });
     }
 
+    socket.on("joinRoom", (room, userName) => {
+        socket.join(room);
+        console.log("user ", userName, " joined room ", room);
+    });
+
     socket.on("sendMessage", async (message) => {
         const newMessage = new Message(message);
         await newMessage.save();
@@ -84,6 +89,12 @@ io.on("connection", (socket) => {
                 .emit("message", newMessage);
             socket.to(message.receiver).emit("updateMessages");
         }
+    });
+
+    socket.on("startPrivateCall", (data) => {
+        const recId = data.recId;
+        const link = data.link;
+        socket.to(recId).emit("privateCalling", link);
     });
 
     shareRoomsInfo();
