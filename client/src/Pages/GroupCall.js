@@ -1,16 +1,15 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import api from "../api";
 import useWebRTC, { LOCAL_VIDEO } from "../hooks/useWebRTC";
 import PhoneOutIcon from "../Icons/PhoneOutIcon";
 import socket from "../socket";
 
-export default function Call() {
-    const [isAnswer, setIsAnswer] = useState(false);
+export default function GroupCall() {
     const [userData, setUserData] = useState({});
-    const location = useLocation();
-    const isReceiver = location.state.isAnswer;
-    const companion = location.state.companion;
+    const [users, setUsers] = useState(1);
+    const [actions, setActions] = useState([]);
+    const [isJoin, setIsJoin] = useState(false);
 
     const { id: roomID } = useParams();
     const navigate = useNavigate();
@@ -31,37 +30,40 @@ export default function Call() {
 
     useEffect(() => {
         if (userData?.userName) {
-            socket.emit("joinRoom", userData._id, userData.userName);
+            socket.emit("joinRoom", "group", userData.userName);
+            setIsJoin(true);
         }
     }, [userData]);
+
+    useEffect(() => {
+        if (isJoin) {
+            socket.emit("getDataGroup", (roomSize) => {
+                console.log("getDataGroup", roomSize);
+                setUsers(roomSize);
+            });
+        }
+    }, [isJoin]);
 
     useEffect(() => {
         getInfo();
     }, []);
 
-    useEffect(() => {
-        socket.on("tookTheCallAnswer", () => {
-            setIsAnswer(true);
-        });
-
-        return () => {
-            socket.off("tookTheCallAnswer");
-        };
-    }, []);
-
-    useEffect(() => {
-        socket.on("endingCall", () => {
-            navigate(-1);
-        });
-        return () => {
-            socket.off("endingCall");
-        };
-    }, []);
-
     const endCall = () => {
-        socket.emit("endCall", { companion });
+        socket.emit("leaveGroupCall", { userName: userData.userName });
         navigate(-1);
     };
+
+    useEffect(() => {
+        const handleGroupAction = (data) => {
+            setActions((prevActions) => [data.message, ...prevActions]);
+            setUsers(data.users);
+            console.log(data);
+        };
+        socket.on("groupAction", handleGroupAction);
+        return () => {
+            socket.off("groupAction", handleGroupAction);
+        };
+    }, []);
 
     return (
         <div className="bg-black flex flex-col items-center min-h-screen">
@@ -81,8 +83,18 @@ export default function Call() {
                     );
                 })}
             <div className="mt-32 text-center text-lg font-medium text-white">
-                {isAnswer || isReceiver ? "Звонок начался" : "Ожидание ответа"}
+                В данный момент на звонке {users} пользователей
             </div>
+            <div className="mt-4 max-h-20 text-center text-lg font-medium text-white overflow-y-scroll">
+                {actions &&
+                    actions.length > 0 &&
+                    actions.map((item, index) => {
+                        // if (index !== actions.length - 1) {
+                        return <div key={index}>{item}</div>;
+                        // }
+                    })}
+            </div>
+
             <div className="mt-auto mx-auto pb-10">
                 <button
                     className="w-14 h-14 rounded-full flex items-center justify-center bg-red-600 "

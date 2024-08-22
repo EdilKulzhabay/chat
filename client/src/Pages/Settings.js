@@ -84,7 +84,7 @@ export default function Settings() {
                         {userData.avatar && userData.avatar !== "" ? (
                             <img
                                 className="h-full"
-                                src={`${process.env.REACT_APP_PORT}/uploads/${userData.avatar}`}
+                                src={`${process.env.REACT_APP_PORT}/chat/uploads/${userData.avatar}`}
                             />
                         ) : (
                             <UserIcon className="w-[90px] h-[90px]" />

@@ -94,7 +94,44 @@ io.on("connection", (socket) => {
     socket.on("startPrivateCall", (data) => {
         const recId = data.recId;
         const link = data.link;
-        socket.to(recId).emit("privateCalling", link);
+        const caller = data.caller;
+        socket.to(recId).emit("privateCalling", {
+            link: link,
+            caller: caller,
+            receiver: recId,
+        });
+    });
+
+    socket.on("tookTheCall", (data) => {
+        socket.to(data.callerId).emit("tookTheCallAnswer");
+    });
+
+    socket.on("endCall", (data) => {
+        console.log("companion", data.companion);
+        socket.to(data.companion).emit("endingCall");
+    });
+
+    socket.on("getDataGroup", (callback) => {
+        const roomSize = io.sockets.adapter.rooms.get("group")?.size || 0;
+        callback(roomSize);
+    });
+
+    socket.on("startGroupCall", (data) => {
+        const recName = data.recName;
+        const roomSize = io.sockets.adapter.rooms.get("group")?.size || 0;
+        io.to("group").emit("groupAction", {
+            message: `${recName} присоеденился к звонку`,
+            users: roomSize + 1,
+        });
+    });
+
+    socket.on("leaveGroupCall", (data) => {
+        const recName = data.userName;
+        const roomSize = io.sockets.adapter.rooms.get("group")?.size || 0;
+        io.to("group").emit("groupAction", {
+            message: `${recName} вышел со звонка`,
+            users: roomSize - 1,
+        });
     });
 
     shareRoomsInfo();

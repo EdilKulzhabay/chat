@@ -47,7 +47,6 @@ export default function MainPage() {
         })
             .then(({ data }) => {
                 setChats(data.chats);
-                console.log(data);
             })
             .catch((e) => {
                 console.log(e);
@@ -124,7 +123,7 @@ export default function MainPage() {
                                                 {item.receiverAvatar ? (
                                                     <img
                                                         className="h-full"
-                                                        src={`${process.env.REACT_APP_PORT}/uploads/${item.receiverAvatar}`}
+                                                        src={`${process.env.REACT_APP_PORT}/chat/uploads/${item.receiverAvatar}`}
                                                     />
                                                 ) : (
                                                     <div className="w-10 h-10 rounded-full flex border items-center justify-center">
@@ -135,7 +134,7 @@ export default function MainPage() {
                                                 )}
                                                 <img
                                                     className="h-full"
-                                                    src={`${process.env.REACT_APP_PORT}/uploads/${item.receiverAvatar}`}
+                                                    src={`${process.env.REACT_APP_PORT}/chat/uploads/${item.receiverAvatar}`}
                                                 />
                                             </div>
                                             <div className="ml-3">

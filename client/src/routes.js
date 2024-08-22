@@ -3,6 +3,7 @@ import AddUsers from "./Pages/AddUsers";
 import Call from "./Pages/Call";
 import Chat from "./Pages/Chat";
 import ChatData from "./Pages/ChatData";
+import GroupCall from "./Pages/GroupCall";
 import Login from "./Pages/Login";
 import Main from "./Pages/Main";
 import MainPage from "./Pages/MainPage";
@@ -17,6 +18,7 @@ export const router = createBrowserRouter([
     { path: "/chat/:id", element: <Chat /> },
     { path: "/chatData/:id", element: <ChatData /> },
     { path: "/call/:id", element: <Call /> },
+    { path: "/groupCall/:id", element: <GroupCall /> },
     { path: "/addUsersEdil", element: <AddUsers /> },
     //{ path: "/test", element: <TestChat /> },
 

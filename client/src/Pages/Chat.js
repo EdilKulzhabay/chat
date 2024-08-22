@@ -73,6 +73,7 @@ export default function Chat() {
             getReceiverData();
         }
         getMessages();
+        console.log(id);
     }, []);
 
     useEffect(() => {
@@ -131,10 +132,20 @@ export default function Chat() {
     const startCall = () => {
         const recId = receiverData._id;
         const link = `/call/${v4()}`;
-        console.log(recId);
         socket.emit("startPrivateCall", {
             recId: recId,
             link: link,
+            caller: userData,
+        });
+
+        navigation(link, { state: { isAnswer: false, companion: recId } });
+    };
+
+    const startGrouopCall = () => {
+        const recName = userData.userName;
+        const link = `/groupCall/f5aa2211-c928-4f34-a8e4-d225e6b2a041`;
+        socket.emit("startGroupCall", {
+            recName: recName,
         });
 
         navigation(link);
@@ -161,7 +172,7 @@ export default function Chat() {
                                 {receiverData.avatar ? (
                                     <img
                                         className="h-full"
-                                        src={`${process.env.REACT_APP_PORT}/uploads/${receiverData.avatar}`}
+                                        src={`${process.env.REACT_APP_PORT}/chat/uploads/${receiverData.avatar}`}
                                     />
                                 ) : (
                                     <div className="w-10 h-10 rounded-full border flex items-center justify-center">
@@ -181,7 +192,13 @@ export default function Chat() {
                     </div>
                     <button
                         className="ml-auto flex items-center justify-center p-2 hover:bg-gray-200 rounded-full"
-                        onClick={startCall}
+                        onClick={() => {
+                            if (id === "group") {
+                                startGrouopCall();
+                            } else {
+                                startCall();
+                            }
+                        }}
                     >
                         <PhoneIcon className="w-5 h-5" />
                     </button>
@@ -202,7 +219,7 @@ export default function Chat() {
                                                     {item.sender.avatar ? (
                                                         <img
                                                             className="h-full"
-                                                            src={`${process.env.REACT_APP_PORT}/uploads/${item.sender.avatar}`}
+                                                            src={`${process.env.REACT_APP_PORT}/chat/uploads/${item.sender.avatar}`}
                                                         />
                                                     ) : (
                                                         <div className="w-7 h-7 rounded-full border flex items-center justify-center">
@@ -220,7 +237,7 @@ export default function Chat() {
                                                     {item.sender.avatar ? (
                                                         <img
                                                             className="h-full"
-                                                            src={`${process.env.REACT_APP_PORT}/uploads/${item.sender.avatar}`}
+                                                            src={`${process.env.REACT_APP_PORT}/chat/uploads/${item.sender.avatar}`}
                                                         />
                                                     ) : (
                                                         <div className="w-7 h-7 rounded-full border flex items-center justify-center">
@@ -250,7 +267,7 @@ export default function Chat() {
                                                     {userData.avatar ? (
                                                         <img
                                                             className="h-full"
-                                                            src={`${process.env.REACT_APP_PORT}/uploads/${userData.avatar}`}
+                                                            src={`${process.env.REACT_APP_PORT}/chat/uploads/${userData.avatar}`}
                                                         />
                                                     ) : (
                                                         <div className="w-7 h-7 rounded-full border flex items-center justify-center">
@@ -261,7 +278,7 @@ export default function Chat() {
                                                     )}
                                                     <img
                                                         className="h-full"
-                                                        src={`${process.env.REACT_APP_PORT}/uploads/${userData.avatar}`}
+                                                        src={`${process.env.REACT_APP_PORT}/chat/uploads/${userData.avatar}`}
                                                     />
                                                 </div>
                                             </div>
@@ -271,7 +288,7 @@ export default function Chat() {
                                                     {receiverData.avatar ? (
                                                         <img
                                                             className="h-full"
-                                                            src={`${process.env.REACT_APP_PORT}/uploads/${receiverData.avatar}`}
+                                                            src={`${process.env.REACT_APP_PORT}/chat/uploads/${receiverData.avatar}`}
                                                         />
                                                     ) : (
                                                         <div className="w-7 h-7 rounded-full border flex items-center justify-center">
