@@ -70,7 +70,7 @@ export default function ChatData() {
                                             {item.avatar ? (
                                                 <img
                                                     className="h-full"
-                                                    src={`${process.env.REACT_APP_PORT}/chat/uploads/${item.avatar}`}
+                                                    src={`${process.env.REACT_APP_PORT}/uploads/${item.avatar}`}
                                                 />
                                             ) : (
                                                 <div className="w-10 h-10 rounded-full border flex items-center justify-center">

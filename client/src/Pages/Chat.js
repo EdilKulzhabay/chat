@@ -172,7 +172,7 @@ export default function Chat() {
                                 {receiverData.avatar ? (
                                     <img
                                         className="h-full"
-                                        src={`${process.env.REACT_APP_PORT}/chat/uploads/${receiverData.avatar}`}
+                                        src={`${process.env.REACT_APP_PORT}/uploads/${receiverData.avatar}`}
                                     />
                                 ) : (
                                     <div className="w-10 h-10 rounded-full border flex items-center justify-center">
@@ -219,7 +219,7 @@ export default function Chat() {
                                                     {item.sender.avatar ? (
                                                         <img
                                                             className="h-full"
-                                                            src={`${process.env.REACT_APP_PORT}/chat/uploads/${item.sender.avatar}`}
+                                                            src={`${process.env.REACT_APP_PORT}/uploads/${item.sender.avatar}`}
                                                         />
                                                     ) : (
                                                         <div className="w-7 h-7 rounded-full border flex items-center justify-center">
@@ -237,7 +237,7 @@ export default function Chat() {
                                                     {item.sender.avatar ? (
                                                         <img
                                                             className="h-full"
-                                                            src={`${process.env.REACT_APP_PORT}/chat/uploads/${item.sender.avatar}`}
+                                                            src={`${process.env.REACT_APP_PORT}/uploads/${item.sender.avatar}`}
                                                         />
                                                     ) : (
                                                         <div className="w-7 h-7 rounded-full border flex items-center justify-center">
@@ -267,7 +267,7 @@ export default function Chat() {
                                                     {userData.avatar ? (
                                                         <img
                                                             className="h-full"
-                                                            src={`${process.env.REACT_APP_PORT}/chat/uploads/${userData.avatar}`}
+                                                            src={`${process.env.REACT_APP_PORT}/uploads/${userData.avatar}`}
                                                         />
                                                     ) : (
                                                         <div className="w-7 h-7 rounded-full border flex items-center justify-center">
@@ -278,7 +278,7 @@ export default function Chat() {
                                                     )}
                                                     <img
                                                         className="h-full"
-                                                        src={`${process.env.REACT_APP_PORT}/chat/uploads/${userData.avatar}`}
+                                                        src={`${process.env.REACT_APP_PORT}/uploads/${userData.avatar}`}
                                                     />
                                                 </div>
                                             </div>
@@ -288,7 +288,7 @@ export default function Chat() {
                                                     {receiverData.avatar ? (
                                                         <img
                                                             className="h-full"
-                                                            src={`${process.env.REACT_APP_PORT}/chat/uploads/${receiverData.avatar}`}
+                                                            src={`${process.env.REACT_APP_PORT}/uploads/${receiverData.avatar}`}
                                                         />
                                                     ) : (
                                                         <div className="w-7 h-7 rounded-full border flex items-center justify-center">
