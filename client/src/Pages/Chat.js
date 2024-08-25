@@ -93,7 +93,8 @@ export default function Chat() {
         };
     }, []);
 
-    const handleSend = async () => {
+    const handleSend = async (e) => {
+        e.preventDefault();
         const messageData = {
             content: message,
             sender: userData._id,
@@ -112,7 +113,7 @@ export default function Chat() {
     const handleKeyDown = (event) => {
         if (event.key === "Enter" && message.length > 0) {
             event.preventDefault(); // Prevent default space behavior (scrolling)
-            handleSend();
+            setMessage(`${message}\n`);
             // messagesEndRef.current?.scrollIntoView(false, { behavior: "smooth" });
         }
     };
@@ -345,6 +346,7 @@ export default function Chat() {
                             value={message}
                             onChange={(e) => setMessage(e.target.value)}
                             style={{ overflowY: "scroll" }}
+                            onKeyDown={handleKeyDown}
                         />
                     </div>
                     <div className="ml-3">
