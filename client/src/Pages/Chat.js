@@ -73,7 +73,6 @@ export default function Chat() {
             getReceiverData();
         }
         getMessages();
-        console.log(id);
     }, []);
 
     useEffect(() => {
@@ -103,6 +102,11 @@ export default function Chat() {
 
         socket.emit("sendMessage", messageData);
         setMessage("");
+
+        setTimeout(() => {
+            document.getElementById("messageTextarea").focus();
+            messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        }, 0);
     };
 
     const handleKeyDown = (event) => {
@@ -203,7 +207,7 @@ export default function Chat() {
                         <PhoneIcon className="w-5 h-5" />
                     </button>
                 </div>
-                <div className="flex-1 space-y-3 py-3 overflow-y-scroll">
+                <div className="flex-1 space-y-3 py-3 px-2 overflow-y-scroll">
                     {messages &&
                         messages.length > 0 &&
                         messages.map((item) => {
@@ -212,7 +216,7 @@ export default function Chat() {
                                     <div key={item._id} className="">
                                         {item.sender._id === userData._id ? (
                                             <div className="flex justify-end items-center gap-x-2">
-                                                <div className="py-px px-1 rounded-full text-sm border">
+                                                <div className="py-1 px-2 rounded-lg max-w-[70%] break-words text-sm border">
                                                     {item.content}
                                                 </div>
                                                 <div className="w-7 h-7 rounded-full overflow-hidden">
@@ -248,7 +252,7 @@ export default function Chat() {
                                                         </div>
                                                     )}
                                                 </div>
-                                                <div className="py-px px-1 rounded-full text-sm border">
+                                                <div className="py-1 px-2 rounded-lg max-w-[70%] break-words text-sm border">
                                                     {item.content}
                                                 </div>
                                             </div>
@@ -260,7 +264,7 @@ export default function Chat() {
                                     <div key={item._id}>
                                         {item.sender === userData._id ? (
                                             <div className="flex justify-end items-center gap-x-2">
-                                                <div className="py-px px-1 rounded-full text-sm border">
+                                                <div className="py-1 px-2 rounded-lg max-w-[70%] break-words text-sm border">
                                                     {item.content}
                                                 </div>
                                                 <div className="w-7 h-7 rounded-full overflow-hidden">
@@ -298,7 +302,7 @@ export default function Chat() {
                                                         </div>
                                                     )}
                                                 </div>
-                                                <div className="py-px px-1 rounded-full text-sm border">
+                                                <div className="py-1 px-2 rounded-lg max-w-[70%] break-words text-sm border">
                                                     {item.content}
                                                 </div>
                                             </div>
@@ -307,17 +311,19 @@ export default function Chat() {
                                 );
                             }
                         })}
-                    <div ref={messagesEndRef} /> {/* Scroll anchor */}
+                    <div ref={messagesEndRef} className="py-1" />{" "}
+                    {/* Scroll anchor */}
                 </div>
                 <div className="flex items-center px-5 py-3 rounded-t-md border-t bg-gray-900 bg-opacity-30">
                     <div className="flex-1">
-                        <input
-                            className="min-w-full outline-none px-2 py-px rounded-full text-sm"
+                        <textarea
+                            id="messageTextarea"
+                            className="min-w-full outline-none px-2 py-1 rounded-lg text-sm"
+                            rows={1}
                             value={message}
                             onChange={(event) => {
                                 setMessage(event.target.value);
                             }}
-                            onKeyDown={handleKeyDown}
                         />
                     </div>
                     <div className="ml-3">

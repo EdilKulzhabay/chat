@@ -141,7 +141,14 @@ export default function MainPage() {
                                                 <div>
                                                     {item.receiverUserName}
                                                 </div>
-                                                <div>{item.lastMessage}</div>
+                                                <div>
+                                                    {item.lastMessage.slice(
+                                                        0,
+                                                        30
+                                                    )}
+                                                    {item.lastMessage.length >
+                                                        30 && "..."}
+                                                </div>
                                             </div>
                                         </Link>
                                     </div>

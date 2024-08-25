@@ -19,7 +19,8 @@ app.use(express.json());
 app.use(
     cors({
         origin: "https://voca.kz",
-        //origin: "http://localhost:3000",
+        // origin: "http://localhost:3000",
+        // origin: "http://192.168.0.10:3000",
         credentials: true,
     })
 );
@@ -81,7 +82,7 @@ io.on("connection", (socket) => {
                 newMessage._id
             ).populate("sender");
             io.emit("message", populatedMessage);
-            io.emit("updateMessages");
+            socket.broadcast.emit("updateMessages");
         } else {
             socket.nsp
                 .to(message.sender)
