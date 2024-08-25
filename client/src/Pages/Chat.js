@@ -216,7 +216,7 @@ export default function Chat() {
                                     ? "Общий чат"
                                     : receiverData.userName}
                             </div>
-                            <div className="text-xs">Сейчас в сети</div>
+                            {/* <div className="text-xs">Сейчас в сети</div> */}
                         </div>
                     </div>
                     <button
