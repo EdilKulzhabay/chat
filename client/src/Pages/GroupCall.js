@@ -38,7 +38,6 @@ export default function GroupCall() {
     useEffect(() => {
         if (isJoin) {
             socket.emit("getDataGroup", (roomSize) => {
-                console.log("getDataGroup", roomSize);
                 setUsers(roomSize);
             });
         }
@@ -57,7 +56,6 @@ export default function GroupCall() {
         const handleGroupAction = (data) => {
             setActions((prevActions) => [data.message, ...prevActions]);
             setUsers(data.users);
-            console.log(data);
         };
         socket.on("groupAction", handleGroupAction);
         return () => {

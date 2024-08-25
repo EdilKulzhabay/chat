@@ -53,7 +53,7 @@ export default function useWebRTC(roomID) {
             }) => {
                 tracksNumber++;
 
-                if (tracksNumber === 1) {
+                if (tracksNumber === 2) {
                     // video & audio tracks received
                     tracksNumber = 0;
                     addNewClient(peerID, () => {
@@ -178,7 +178,10 @@ export default function useWebRTC(roomID) {
             localMediaStream.current =
                 await navigator.mediaDevices.getUserMedia({
                     audio: true,
-                    video: false,
+                    video: {
+                        width: 1280,
+                        height: 720,
+                    },
                 });
 
             addNewClient(LOCAL_VIDEO, () => {

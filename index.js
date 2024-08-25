@@ -18,8 +18,8 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(
     cors({
-        origin: "https://voca.kz",
-        // origin: "http://localhost:3000",
+        // origin: "https://voca.kz",
+        origin: "http://localhost:3000",
         // origin: "http://192.168.0.10:3000",
         credentials: true,
     })
@@ -54,20 +54,21 @@ global.io = new Server(server, {
     },
 });
 
+function getClientRooms() {
+    const { rooms } = io.sockets.adapter;
+
+    return Array.from(rooms.keys()).filter(
+        (roomID) => validate(roomID) && version(roomID) === 4
+    );
+}
+
+function shareRoomsInfo() {
+    io.emit(ACTIONS.SHARE_ROOMS, {
+        rooms: getClientRooms(),
+    });
+}
+
 io.on("connection", (socket) => {
-    function getClientRooms() {
-        const { rooms } = io.sockets.adapter;
-        return Array.from(rooms.keys()).filter(
-            (roomID) => validate(roomID) && version(roomID) === 4
-        );
-    }
-
-    function shareRoomsInfo() {
-        io.emit(ACTIONS.SHARE_ROOMS, {
-            rooms: getClientRooms(),
-        });
-    }
-
     socket.on("joinRoom", (room, userName) => {
         socket.join(room);
         console.log("user ", userName, " joined room ", room);
@@ -161,49 +162,49 @@ io.on("connection", (socket) => {
 
         socket.join(roomID);
         shareRoomsInfo();
+    });
 
-        function leaveRoom() {
-            const { rooms } = socket;
+    function leaveRoom() {
+        const { rooms } = socket;
 
-            Array.from(rooms)
-                // LEAVE ONLY CLIENT CREATED ROOM
-                //   .filter(roomID => validate(roomID) && version(roomID) === 4)
-                .forEach((roomID) => {
-                    const clients = Array.from(
-                        io.sockets.adapter.rooms.get(roomID) || []
-                    );
+        Array.from(rooms)
+            // LEAVE ONLY CLIENT CREATED ROOM
+            .filter((roomID) => validate(roomID) && version(roomID) === 4)
+            .forEach((roomID) => {
+                const clients = Array.from(
+                    io.sockets.adapter.rooms.get(roomID) || []
+                );
 
-                    clients.forEach((clientID) => {
-                        io.to(clientID).emit(ACTIONS.REMOVE_PEER, {
-                            peerID: socket.id,
-                        });
-
-                        socket.emit(ACTIONS.REMOVE_PEER, {
-                            peerID: clientID,
-                        });
+                clients.forEach((clientID) => {
+                    io.to(clientID).emit(ACTIONS.REMOVE_PEER, {
+                        peerID: socket.id,
                     });
 
-                    socket.leave(roomID);
+                    socket.emit(ACTIONS.REMOVE_PEER, {
+                        peerID: clientID,
+                    });
                 });
 
-            shareRoomsInfo();
-        }
-
-        socket.on(ACTIONS.LEAVE, leaveRoom);
-        socket.on("disconnecting", leaveRoom);
-
-        socket.on(ACTIONS.RELAY_SDP, ({ peerID, sessionDescription }) => {
-            io.to(peerID).emit(ACTIONS.SESSION_DESCRIPTION, {
-                peerID: socket.id,
-                sessionDescription,
+                socket.leave(roomID);
             });
+
+        shareRoomsInfo();
+    }
+
+    socket.on(ACTIONS.LEAVE, leaveRoom);
+    socket.on("disconnecting", leaveRoom);
+
+    socket.on(ACTIONS.RELAY_SDP, ({ peerID, sessionDescription }) => {
+        io.to(peerID).emit(ACTIONS.SESSION_DESCRIPTION, {
+            peerID: socket.id,
+            sessionDescription,
         });
+    });
 
-        socket.on(ACTIONS.RELAY_ICE, ({ peerID, iceCandidate }) => {
-            io.to(peerID).emit(ACTIONS.ICE_CANDIDATE, {
-                peerID: socket.id,
-                iceCandidate,
-            });
+    socket.on(ACTIONS.RELAY_ICE, ({ peerID, iceCandidate }) => {
+        io.to(peerID).emit(ACTIONS.ICE_CANDIDATE, {
+            peerID: socket.id,
+            iceCandidate,
         });
     });
 
