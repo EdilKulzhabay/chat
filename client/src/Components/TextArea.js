@@ -1,26 +1,28 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useRef } from "react";
 
-function AutoResizingTextarea(props) {
-  const [message, setMessage] = useState("");
+function AutoResizingTextarea({ message, setMessage }) {
   const textareaRef = useRef(null);
 
-  useEffect(() => {
+  const handleInputChange = (event) => {
+    setMessage(event.target.value);
+
     const textarea = textareaRef.current;
-    textarea.style.height = "auto"; // Reset the height to auto to calculate the correct scrollHeight
-    const maxHeight =
-      textarea.scrollHeight > 100 ? "100px" : `${textarea.scrollHeight}px`;
-    textarea.style.height = maxHeight; // Set the height to either maxHeight or the calculated scrollHeight
-  }, [message]);
+    textarea.style.height = "auto"; // Reset the height to auto
+    const maxHeight = 4 * 24; // Assuming each row is approximately 24px tall
+    const newHeight =
+      textarea.scrollHeight > maxHeight ? maxHeight : textarea.scrollHeight;
+    textarea.style.height = `${newHeight}px`;
+  };
 
   return (
     <textarea
       ref={textareaRef}
       id="messageTextarea"
       rows={1}
-      className="min-w-full outline-none px-2 py-1 rounded-lg text-sm max-h-[100px] resize-none"
+      className="min-w-full outline-none px-2 py-1 rounded-lg text-sm resize-none"
       value={message}
-      onChange={(event) => setMessage(event.target.value)}
-      style={{ overflowY: "hidden" }} // Hide scrollbar
+      onChange={handleInputChange}
+      style={{ overflowY: "scroll" }}
     />
   );
 }

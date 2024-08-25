@@ -7,6 +7,7 @@ import api from "../api";
 import socket from "../socket";
 import { v4 } from "uuid";
 import CallComponent from "../Components/CallComponent";
+import AutoResizingTextarea from "../Components/TextArea";
 
 export default function Chat() {
   const { id } = useParams();
@@ -300,16 +301,7 @@ export default function Chat() {
         </div>
         <div className="fixed flex bottom-0 w-full items-center px-5 py-3 rounded-t-md border-t bg-gray-900 bg-opacity-30">
           <div className="flex-1">
-            <textarea
-              autosize
-              rows={1}
-              id="messageTextarea"
-              className="min-w-full outline-none px-2 py-1 rounded-lg text-sm max-h-[100px] "
-              value={message}
-              onChange={(event) => {
-                setMessage(event.target.value);
-              }}
-            />
+            <AutoResizingTextarea value={message} setMessage={setMessage} />
           </div>
           <div className="ml-3">
             <button
