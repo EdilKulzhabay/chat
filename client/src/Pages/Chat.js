@@ -103,11 +103,6 @@ export default function Chat() {
         setMessage("");
 
         socket.emit("sendMessage", messageData);
-
-        setTimeout(() => {
-            document.getElementById("messageTextarea").focus();
-            // messagesEndRef.current?.scrollIntoView(false, { behavior: "smooth" });
-        }, 0);
     };
 
     useEffect(() => {
@@ -340,7 +335,7 @@ export default function Chat() {
                             }
                         })}
                 </div>
-                <div className="fixed flex bottom-0 w-full items-center px-5 py-3 rounded-t-md border-t bg-gray-900 bg-opacity-30">
+                <div className="fixedflex bottom-0 w-full items-center px-5 py-3 rounded-t-md border-t bg-gray-900 bg-opacity-30">
                     <div className="flex-1">
                         <textarea
                             ref={textareaRef}
