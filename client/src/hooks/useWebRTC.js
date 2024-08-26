@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import freeice from "freeice";
 import useStateWithCallback from "./useStateWithCallback";
 import socket from "../socket";
@@ -8,6 +8,7 @@ export const LOCAL_VIDEO = "LOCAL_VIDEO";
 
 export default function useWebRTC(roomID) {
     const [clients, updateClients] = useStateWithCallback([]);
+    const [isSpeakerEnabled, setIsSpeakerEnabled] = useState(false);
 
     const addNewClient = useCallback(
         (newClient, cb) => {
@@ -54,14 +55,12 @@ export default function useWebRTC(roomID) {
                 tracksNumber++;
 
                 if (tracksNumber === 1) {
-                    // video & audio tracks received
                     tracksNumber = 0;
                     addNewClient(peerID, () => {
                         if (peerMediaElements.current[peerID]) {
                             peerMediaElements.current[peerID].srcObject =
                                 remoteStream;
                         } else {
-                            // FIX LONG RENDER IN CASE OF MANY CLIENTS
                             let settled = false;
                             const interval = setInterval(() => {
                                 if (peerMediaElements.current[peerID]) {
@@ -205,6 +204,17 @@ export default function useWebRTC(roomID) {
         };
     }, [roomID]);
 
+    const toggleSpeaker = useCallback(() => {
+        setIsSpeakerEnabled((prev) => !prev);
+
+        const audioElement = peerMediaElements.current[LOCAL_VIDEO];
+        if (audioElement) {
+            audioElement
+                .setSinkId(isSpeakerEnabled ? "default" : "speaker")
+                .catch((e) => console.error("Error setting sink ID:", e));
+        }
+    }, [isSpeakerEnabled]);
+
     const provideMediaRef = useCallback((id, node) => {
         peerMediaElements.current[id] = node;
     }, []);
@@ -212,5 +222,7 @@ export default function useWebRTC(roomID) {
     return {
         clients,
         provideMediaRef,
+        toggleSpeaker,
+        isSpeakerEnabled,
     };
 }

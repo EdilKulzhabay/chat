@@ -3,6 +3,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import api from "../api";
 import useWebRTC, { LOCAL_VIDEO } from "../hooks/useWebRTC";
 import PhoneOutIcon from "../Icons/PhoneOutIcon";
+// import SpeakerIcon from "../Icons/SpeakerIcon"; // Иконка для переключения динамика
 import socket from "../socket";
 
 export default function Call() {
@@ -15,7 +16,8 @@ export default function Call() {
     const { id: roomID } = useParams();
     const navigate = useNavigate();
 
-    const { clients, provideMediaRef } = useWebRTC(roomID);
+    const { clients, provideMediaRef, toggleSpeaker, isSpeakerEnabled } =
+        useWebRTC(roomID);
 
     const getInfo = () => {
         api.get("/getMe", {
@@ -83,9 +85,17 @@ export default function Call() {
             <div className="mt-32 text-center text-lg font-medium text-white">
                 {isAnswer || isReceiver ? "Звонок начался" : "Ожидание ответа"}
             </div>
-            <div className="mt-auto mx-auto pb-10">
+
+            <div className="mt-auto mx-auto pb-10 flex gap-4">
                 <button
-                    className="w-14 h-14 rounded-full flex items-center justify-center bg-red-600 "
+                    className="w-14 h-14 rounded-full flex items-center justify-center bg-blue-600"
+                    onClick={toggleSpeaker}
+                >
+                    {/* <SpeakerIcon className="text-white w-8 h-8" /> */}
+                    <div className="w-8 h-8 bg-red-900"></div>
+                </button>
+                <button
+                    className="w-14 h-14 rounded-full flex items-center justify-center bg-red-600"
                     onClick={endCall}
                 >
                     <PhoneOutIcon className="text-white w-8 h-8" />
