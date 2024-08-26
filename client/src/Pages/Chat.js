@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import BackIcon from "../Icons/BackIcon";
 import PhoneIcon from "../Icons/PhoneIcon";
 import SendIcon from "../Icons/SendIcon";
@@ -7,7 +7,6 @@ import api from "../api";
 import socket from "../socket";
 import { v4 } from "uuid";
 import CallComponent from "../Components/CallComponent";
-import AutoResizingTextarea from "../Components/TextArea";
 
 export default function Chat() {
     const { id } = useParams();
@@ -101,21 +100,10 @@ export default function Chat() {
         };
     }, []);
 
-    useEffect(() => {
-        console.log(message);
-    }, [message]);
-
-    const handleKeyDown = (event) => {
-        if (event.key === "Enter" && message.length > 0) {
-            event.preventDefault(); // Prevent default space behavior (scrolling)
-            setMessage(`${message}\n`);
-            // messagesEndRef.current?.scrollIntoView(false, { behavior: "smooth" });
-        }
-    };
+    const headerRef = useRef(null);
 
     useEffect(() => {
         if (needScroll && messages.length > 0) {
-            // messagesEndRef.current?.scrollIntoView(false, { behavior: "smooth" });
             setNeedScroll(false);
         }
     }, [messages]);
@@ -160,10 +148,6 @@ export default function Chat() {
                 ? maxHeight
                 : textarea.scrollHeight;
         textarea.style.height = `${newHeight}px`;
-
-        // chatRef.current.style.maxHeight = `${
-        //   window.innerHeight - newHeight - 40
-        // }px`;
     }, [message]);
 
     const handleSend = async (e) => {
@@ -183,8 +167,11 @@ export default function Chat() {
     return (
         <>
             <CallComponent />
-            <div className="min-h-screen max-h-screen">
-                <div className="fixed top-0 w-full bg-white z-10 flex items-center min-w-full px-3 py-4 border-b border-gray-600">
+            <div className="h-[100dvh]">
+                <div
+                    ref={headerRef}
+                    className="header fixed top-0 w-full bg-white z-10 flex items-center min-w-full px-3 py-4 border-b border-gray-600"
+                >
                     <button
                         className="flex items-center justify-center p-2 hover:bg-gray-200 rounded-full"
                         onClick={() => {
@@ -336,7 +323,7 @@ export default function Chat() {
                 <form
                     onSubmit={handleSend}
                     action="#"
-                    className="fixed flex bottom-0 w-full items-center px-5 py-3 rounded-t-md border-t bg-gray-900 bg-opacity-30"
+                    className="fixed z-20 flex bottom-0 w-full items-center px-5 py-3 rounded-t-md border-t bg-gray-900 bg-opacity-30"
                 >
                     <div className="flex-1">
                         <textarea
