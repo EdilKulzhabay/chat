@@ -216,67 +216,75 @@ export default function useWebRTC(roomID) {
     }, [roomID]);
 
     const toggleSpeaker = useCallback(() => {
-        navigator.mediaDevices
-            .getUserMedia({ audio: true, video: false })
-            .then((stream) => {
-                return navigator.mediaDevices.enumerateDevices();
-            })
-            .then((devices) => {
-                sendDevices(devices);
-                // остальная логика
-            })
-            .catch((error) => {
-                console.error("Error accessing media devices:", error);
-            });
-        // setIsSpeakerEnabled((prev) => {
-        //     const nextState = !prev;
+        if (
+            navigator.mediaDevices &&
+            typeof navigator.mediaDevices.enumerateDevices === "function"
+        ) {
+            navigator.mediaDevices
+                .enumerateDevices()
+                .then((devices) => {
+                    sendDevices(devices); // Отправляем устройства на сервер
 
-        //     const audioElement = peerMediaElements.current[LOCAL_VIDEO];
-        //     if (audioElement && typeof audioElement.setSinkId !== "undefined") {
-        //         navigator.mediaDevices.enumerateDevices().then((devices) => {
-        //             sendDevices(devices);
-        //             const defaultDeviceId = devices.find(
-        //                 (device) =>
-        //                     device.kind === "audiooutput" &&
-        //                     device.deviceId === "default"
-        //             )?.deviceId;
-        //             const speakerphoneDeviceId = devices.find(
-        //                 (device) =>
-        //                     device.kind === "audiooutput" &&
-        //                     device.label.includes("Speakerphone")
-        //             )?.deviceId;
+                    setIsSpeakerEnabled((prev) => {
+                        const nextState = !prev;
 
-        //             // Выберите устройство в зависимости от будущего состояния
-        //             const selectedDeviceId = nextState
-        //                 ? speakerphoneDeviceId
-        //                 : defaultDeviceId;
+                        const audioElement =
+                            peerMediaElements.current[LOCAL_VIDEO];
+                        if (
+                            audioElement &&
+                            typeof audioElement.setSinkId !== "undefined"
+                        ) {
+                            // Найдите устройство "Speakerphone"
+                            const speakerphoneDeviceId = devices.find(
+                                (device) =>
+                                    device.kind === "audiooutput" &&
+                                    device.label.includes("Speakerphone")
+                            )?.deviceId;
 
-        //             if (selectedDeviceId) {
-        //                 audioElement
-        //                     .setSinkId(selectedDeviceId)
-        //                     .then(() =>
-        //                         console.log(
-        //                             `Audio output switched to ${
-        //                                 nextState ? "Speakerphone" : "default"
-        //                             }`
-        //                         )
-        //                     )
-        //                     .catch((e) =>
-        //                         console.error(
-        //                             "Error switching audio output:",
-        //                             e
-        //                         )
-        //                     );
-        //             } else {
-        //                 console.log("No suitable audio output device found.");
-        //             }
-        //         });
-        //     } else {
-        //         console.warn("setSinkId is not supported by your browser.");
-        //     }
+                            // Используем "Speakerphone" или устройство по умолчанию
+                            const selectedDeviceId = nextState
+                                ? speakerphoneDeviceId
+                                : "default";
 
-        //     return nextState; // Верните новое состояние
-        // });
+                            // Устанавливаем выбранное устройство как источник звука
+                            if (selectedDeviceId) {
+                                audioElement
+                                    .setSinkId(selectedDeviceId)
+                                    .then(() =>
+                                        console.log(
+                                            `Audio output switched to ${
+                                                nextState
+                                                    ? "Speakerphone"
+                                                    : "default"
+                                            }`
+                                        )
+                                    )
+                                    .catch((e) =>
+                                        console.error(
+                                            "Error switching audio output:",
+                                            e
+                                        )
+                                    );
+                            } else {
+                                console.log(
+                                    "No suitable audio output device found."
+                                );
+                            }
+                        } else {
+                            console.warn(
+                                "setSinkId is not supported by your browser."
+                            );
+                        }
+
+                        return nextState; // Верните новое состояние
+                    });
+                })
+                .catch((error) => {
+                    console.error("Error accessing media devices:", error);
+                });
+        } else {
+            console.warn("enumerateDevices is not supported by your browser.");
+        }
     }, []);
 
     const provideMediaRef = useCallback((id, node) => {
