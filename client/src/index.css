@@ -14,7 +14,6 @@
     overflow-y: auto;
     overflow-x: hidden;
     height: calc(100dvh - 50px);
-    border: 1px solid black;
 }
 
 .chat-box {
