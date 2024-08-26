@@ -53,7 +53,7 @@ export default function useWebRTC(roomID) {
             }) => {
                 tracksNumber++;
 
-                if (tracksNumber === 2) {
+                if (tracksNumber === 1) {
                     // video & audio tracks received
                     tracksNumber = 0;
                     addNewClient(peerID, () => {

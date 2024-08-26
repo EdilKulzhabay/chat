@@ -17,8 +17,9 @@ export default function Chat() {
     const [userData, setUserData] = useState({});
     const [receiverData, setReceiverData] = useState({});
     const [page, setPage] = useState(1);
-    const messagesEndRef = useRef(null);
     const [needScroll, setNeedScroll] = useState(true);
+    const textareaRef = useRef(null);
+    const chatRef = useRef(null);
 
     const getInfo = () => {
         api.get("/getMe", {
@@ -88,7 +89,7 @@ export default function Chat() {
                 setMessages((prevMessages) => [newMessage, ...prevMessages]);
             } else if (
                 newMessage.type === "private" &&
-                id === newMessage.sender
+                (id === newMessage.receiver || id === newMessage.sender)
             ) {
                 setMessages((prevMessages) => [newMessage, ...prevMessages]);
             }
@@ -99,19 +100,6 @@ export default function Chat() {
             socket.off("message", handleMessage);
         };
     }, []);
-
-    const handleSend = async () => {
-        textareaRef.current.focus();
-        const messageData = {
-            content: message,
-            sender: userData._id,
-            type: id === "group" ? "group" : "private",
-            receiver: id === "group" ? null : receiverData._id,
-        };
-        setMessage("");
-
-        socket.emit("sendMessage", messageData);
-    };
 
     useEffect(() => {
         console.log(message);
@@ -163,9 +151,6 @@ export default function Chat() {
         navigation(link);
     };
 
-    const textareaRef = useRef(null);
-    const chatRef = useRef(null);
-
     useEffect(() => {
         const textarea = textareaRef.current;
         textarea.style.height = "auto"; // Reset the height to auto
@@ -176,12 +161,25 @@ export default function Chat() {
                 : textarea.scrollHeight;
         textarea.style.height = `${newHeight}px`;
 
-        console.log(window.innerHeight - newHeight);
+        // console.log(window.innerHeight - newHeight);
 
         chatRef.current.style.maxHeight = `${
             window.innerHeight - newHeight - 110
         }px`;
     }, [message]);
+
+    const handleSend = async () => {
+        textareaRef.current.focus();
+        const messageData = {
+            content: message,
+            sender: userData._id,
+            type: id === "group" ? "group" : "private",
+            receiver: id === "group" ? null : receiverData._id,
+        };
+        setMessage("");
+
+        socket.emit("sendMessage", messageData);
+    };
 
     return (
         <>
@@ -343,13 +341,12 @@ export default function Chat() {
                     <div className="flex-1">
                         <textarea
                             ref={textareaRef}
-                            id="messageTextarea"
                             rows={1}
                             className="min-w-full outline-none px-2 py-1 rounded-lg text-sm resize-none"
                             value={message}
                             onChange={(e) => setMessage(e.target.value)}
                             style={{ overflowY: "scroll" }}
-                            onKeyDown={handleKeyDown}
+                            //onKeyDown={handleKeyDown}
                         />
                     </div>
                     <div className="ml-3">
