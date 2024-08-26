@@ -84,7 +84,14 @@ export default function Chat() {
 
     useEffect(() => {
         const handleMessage = (newMessage) => {
-            setMessages((prevMessages) => [newMessage, ...prevMessages]);
+            if (id === "group" && newMessage.type === "group") {
+                setMessages((prevMessages) => [newMessage, ...prevMessages]);
+            } else if (
+                newMessage.type === "private" &&
+                id === newMessage.sender
+            ) {
+                setMessages((prevMessages) => [newMessage, ...prevMessages]);
+            }
         };
 
         socket.on("message", handleMessage);
@@ -93,8 +100,8 @@ export default function Chat() {
         };
     }, []);
 
-    const handleSend = async (e) => {
-        e.preventDefault();
+    const handleSend = async () => {
+        textareaRef.current.focus();
         const messageData = {
             content: message,
             sender: userData._id,
@@ -215,18 +222,14 @@ export default function Chat() {
                             {/* <div className="text-xs">Сейчас в сети</div> */}
                         </div>
                     </div>
-                    <button
-                        className="ml-auto flex items-center justify-center p-2 hover:bg-gray-200 rounded-full"
-                        onClick={() => {
-                            if (id === "group") {
-                                startGrouopCall();
-                            } else {
-                                startCall();
-                            }
-                        }}
-                    >
-                        <PhoneIcon className="w-5 h-5" />
-                    </button>
+                    {id !== "group" && (
+                        <button
+                            className="ml-auto flex items-center justify-center p-2 hover:bg-gray-200 rounded-full"
+                            onClick={startCall}
+                        >
+                            <PhoneIcon className="w-5 h-5" />
+                        </button>
+                    )}
                 </div>
                 <div
                     ref={chatRef}

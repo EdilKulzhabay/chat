@@ -9,7 +9,7 @@
 }
 
 .chat-overflow {
-    max-height: 80dvh;
+    max-height: 80vh;
     padding: 10px;
     display: flex;
     flex-direction: column-reverse;
