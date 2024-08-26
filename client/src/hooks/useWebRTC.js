@@ -208,16 +208,47 @@ export default function useWebRTC(roomID) {
         setIsSpeakerEnabled((prev) => !prev);
 
         const audioElement = peerMediaElements.current[LOCAL_VIDEO];
-        if (audioElement) {
-            audioElement
-                .setSinkId(isSpeakerEnabled ? "default" : "speaker")
-                .catch((e) => console.error("Error setting sink ID:", e));
+        if (audioElement && typeof audioElement.setSinkId !== "undefined") {
+            navigator.mediaDevices.enumerateDevices().then((devices) => {
+                const defaultDeviceId = devices.find(
+                    (device) =>
+                        device.kind === "audiooutput" &&
+                        device.deviceId === "default"
+                )?.deviceId;
+                const speakerphoneDeviceId = devices.find(
+                    (device) =>
+                        device.kind === "audiooutput" &&
+                        device.label.includes("Speakerphone")
+                )?.deviceId;
+
+                // Выберите устройство в зависимости от текущего состояния
+                const selectedDeviceId = isSpeakerEnabled
+                    ? defaultDeviceId
+                    : speakerphoneDeviceId;
+
+                if (selectedDeviceId) {
+                    audioElement
+                        .setSinkId(selectedDeviceId)
+                        .then(() =>
+                            console.log(
+                                `Audio output switched to ${
+                                    isSpeakerEnabled
+                                        ? "default"
+                                        : "Speakerphone"
+                                }`
+                            )
+                        )
+                        .catch((e) =>
+                            console.error("Error switching audio output:", e)
+                        );
+                } else {
+                    console.log("No suitable audio output device found.");
+                }
+            });
+        } else {
+            console.warn("setSinkId is not supported by your browser.");
         }
     }, [isSpeakerEnabled]);
-
-    const provideMediaRef = useCallback((id, node) => {
-        peerMediaElements.current[id] = node;
-    }, []);
 
     return {
         clients,

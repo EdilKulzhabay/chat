@@ -12,48 +12,7 @@ export default function Chat() {
     const { id } = useParams();
     const navigation = useNavigate();
     const [message, setMessage] = useState("");
-    const [messages, setMessages] = useState([
-        { content: "Привет", sender: "1", receiver: "2" },
-        { content: "Привет", sender: "1", receiver: "2" },
-        { content: "Привет", sender: "1", receiver: "2" },
-        { content: "Привет", sender: "1", receiver: "2" },
-        { content: "Привет", sender: "1", receiver: "2" },
-        { content: "Привет", sender: "1", receiver: "2" },
-        { content: "Привет", sender: "1", receiver: "2" },
-        { content: "Привет", sender: "1", receiver: "2" },
-        { content: "Привет", sender: "1", receiver: "2" },
-        { content: "Привет", sender: "1", receiver: "2" },
-        { content: "Привет", sender: "1", receiver: "2" },
-        { content: "Привет", sender: "1", receiver: "2" },
-        { content: "Привет", sender: "1", receiver: "2" },
-        { content: "Привет", sender: "1", receiver: "2" },
-        { content: "Привет", sender: "1", receiver: "2" },
-        { content: "Привет", sender: "1", receiver: "2" },
-        { content: "Привет", sender: "1", receiver: "2" },
-        { content: "Привет", sender: "1", receiver: "2" },
-        { content: "Привет", sender: "1", receiver: "2" },
-        { content: "Привет", sender: "1", receiver: "2" },
-        { content: "Привет", sender: "1", receiver: "2" },
-        { content: "Привет", sender: "1", receiver: "2" },
-        { content: "Привет", sender: "1", receiver: "2" },
-        { content: "Привет", sender: "1", receiver: "2" },
-        { content: "Привет", sender: "1", receiver: "2" },
-        { content: "Привет", sender: "1", receiver: "2" },
-        { content: "Привет", sender: "1", receiver: "2" },
-        { content: "Привет", sender: "1", receiver: "2" },
-        { content: "Привет", sender: "1", receiver: "2" },
-        { content: "Привет", sender: "1", receiver: "2" },
-        { content: "Привет", sender: "1", receiver: "2" },
-        { content: "Привет", sender: "1", receiver: "2" },
-        { content: "Привет", sender: "1", receiver: "2" },
-        { content: "Привет", sender: "1", receiver: "2" },
-        { content: "Привет", sender: "1", receiver: "2" },
-        { content: "Привет", sender: "1", receiver: "2" },
-        { content: "Привет", sender: "1", receiver: "2" },
-        { content: "Привет", sender: "1", receiver: "2" },
-        { content: "Привет", sender: "1", receiver: "2" },
-        { content: "Привет", sender: "1", receiver: "2" },
-    ]);
+    const [messages, setMessages] = useState([]);
     const [userData, setUserData] = useState({});
     const [receiverData, setReceiverData] = useState({});
     const [page, setPage] = useState(1);
