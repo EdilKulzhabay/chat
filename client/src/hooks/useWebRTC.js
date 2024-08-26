@@ -250,6 +250,10 @@ export default function useWebRTC(roomID) {
         }
     }, [isSpeakerEnabled]);
 
+    const provideMediaRef = useCallback((id, node) => {
+        peerMediaElements.current[id] = node;
+    }, []);
+
     return {
         clients,
         provideMediaRef,

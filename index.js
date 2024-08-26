@@ -19,8 +19,8 @@ app.use(express.json());
 app.use(
     cors({
         // origin: "*",
-        origin: "https://voca.kz",
-        // origin: "http://localhost:3000",
+        // origin: "https://voca.kz",
+        origin: "http://localhost:3000",
         // origin: "http://192.168.0.10:3000",
         credentials: true,
     })
