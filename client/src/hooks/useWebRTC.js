@@ -216,76 +216,54 @@ export default function useWebRTC(roomID) {
     }, [roomID]);
 
     const toggleSpeaker = useCallback(() => {
-        if (
-            navigator.mediaDevices &&
-            typeof navigator.mediaDevices.enumerateDevices === "function"
-        ) {
-            navigator.mediaDevices
-                .enumerateDevices()
-                .then((devices) => {
-                    sendDevices(devices); // Отправляем устройства на сервер
+        const audioElement = peerMediaElements.current[LOCAL_VIDEO];
 
-                    setIsSpeakerEnabled((prev) => {
-                        const nextState = !prev;
+        if (audioElement && typeof audioElement.setSinkId !== "undefined") {
+            navigator.mediaDevices.enumerateDevices().then((devices) => {
+                const earpieceDevice = devices.find(
+                    (device) =>
+                        device.kind === "audiooutput" &&
+                        device.label.includes("Headset earpiece")
+                );
 
-                        const audioElement =
-                            peerMediaElements.current[LOCAL_VIDEO];
-                        if (
-                            audioElement &&
-                            typeof audioElement.setSinkId !== "undefined"
-                        ) {
-                            // Найдите устройство "Speakerphone"
-                            const speakerphoneDeviceId = devices.find(
-                                (device) =>
-                                    device.kind === "audiooutput" &&
-                                    device.label.includes("Speakerphone")
-                            )?.deviceId;
+                const speakerDevice = devices.find(
+                    (device) =>
+                        device.kind === "audiooutput" &&
+                        device.label.includes("Speakerphone")
+                );
 
-                            // Используем "Speakerphone" или устройство по умолчанию
-                            const selectedDeviceId = nextState
-                                ? speakerphoneDeviceId
-                                : "default";
+                const selectedDeviceId = isSpeakerEnabled
+                    ? earpieceDevice?.deviceId || "default"
+                    : speakerDevice?.deviceId || "default";
 
-                            // Устанавливаем выбранное устройство как источник звука
-                            if (selectedDeviceId) {
-                                audioElement
-                                    .setSinkId(selectedDeviceId)
-                                    .then(() =>
-                                        console.log(
-                                            `Audio output switched to ${
-                                                nextState
-                                                    ? "Speakerphone"
-                                                    : "default"
-                                            }`
-                                        )
-                                    )
-                                    .catch((e) =>
-                                        console.error(
-                                            "Error switching audio output:",
-                                            e
-                                        )
-                                    );
-                            } else {
-                                console.log(
-                                    "No suitable audio output device found."
-                                );
-                            }
-                        } else {
-                            console.warn(
-                                "setSinkId is not supported by your browser."
-                            );
-                        }
+                if (selectedDeviceId) {
+                    audioElement
+                        .setSinkId(selectedDeviceId)
+                        .then(() =>
+                            console.log(
+                                `Audio output switched to ${
+                                    isSpeakerEnabled
+                                        ? "Headset earpiece"
+                                        : "Speakerphone"
+                                }`
+                            )
+                        )
+                        .catch((error) =>
+                            console.error(
+                                "Error switching audio output:",
+                                error
+                            )
+                        );
+                } else {
+                    console.warn("No suitable audio output device found.");
+                }
 
-                        return nextState; // Верните новое состояние
-                    });
-                })
-                .catch((error) => {
-                    console.error("Error accessing media devices:", error);
-                });
+                setIsSpeakerEnabled(!isSpeakerEnabled);
+            });
         } else {
-            console.warn("enumerateDevices is not supported by your browser.");
+            console.warn("setSinkId is not supported by your browser.");
         }
-    }, []);
+    }, [isSpeakerEnabled]);
 
     const provideMediaRef = useCallback((id, node) => {
         peerMediaElements.current[id] = node;
