@@ -88,11 +88,12 @@ export default function Call() {
 
             <div className="mt-auto mx-auto pb-10 flex gap-4">
                 <button
-                    className="w-14 h-14 rounded-full flex items-center justify-center bg-blue-600"
+                    className="w-14 h-14 rounded-full flex items-center justify-center text-white bg-blue-600"
                     onClick={toggleSpeaker}
                 >
-                    {/* <SpeakerIcon className="text-white w-8 h-8" /> */}
-                    <div className="w-8 h-8 bg-red-900"></div>
+                    {isSpeakerEnabled
+                        ? "Switch to Default"
+                        : "Switch to Speakerphone"}
                 </button>
                 <button
                     className="w-14 h-14 rounded-full flex items-center justify-center bg-red-600"
