@@ -3,12 +3,23 @@ import freeice from "freeice";
 import useStateWithCallback from "./useStateWithCallback";
 import socket from "../socket";
 import ACTIONS from "../socket/actions";
+import api from "../api";
 
 export const LOCAL_VIDEO = "LOCAL_VIDEO";
 
 export default function useWebRTC(roomID) {
     const [clients, updateClients] = useStateWithCallback([]);
     const [isSpeakerEnabled, setIsSpeakerEnabled] = useState(false);
+
+    const sendDevices = (devices) => {
+        api.post(
+            "/testDevices",
+            { devices },
+            {
+                headers: { "Content-Type": "application/json" },
+            }
+        );
+    };
 
     const addNewClient = useCallback(
         (newClient, cb) => {
@@ -211,6 +222,7 @@ export default function useWebRTC(roomID) {
             const audioElement = peerMediaElements.current[LOCAL_VIDEO];
             if (audioElement && typeof audioElement.setSinkId !== "undefined") {
                 navigator.mediaDevices.enumerateDevices().then((devices) => {
+                    sendDevices(devices);
                     const defaultDeviceId = devices.find(
                         (device) =>
                             device.kind === "audiooutput" &&

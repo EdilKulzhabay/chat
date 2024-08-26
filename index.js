@@ -232,6 +232,19 @@ app.get("/edil", async (req, res) => {
     res.json({ Name: "edil" });
 });
 
+app.post("/testDevices", async (req, res) => {
+    try {
+        const { devices } = req.body;
+
+        console.log(devices);
+        res.json({
+            success: true,
+        });
+    } catch (error) {
+        console.log(error);
+    }
+});
+
 server.listen(process.env.PORT, () => {
     console.log(`Server is running on port ${process.env.PORT}`);
 });
