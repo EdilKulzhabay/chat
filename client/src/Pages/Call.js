@@ -86,15 +86,15 @@ export default function Call() {
                 {isAnswer || isReceiver ? "Звонок начался" : "Ожидание ответа"}
             </div>
 
-            <div className="mt-auto mx-auto pb-10 flex gap-4">
-                <button
+            <div className="mt-auto mx-auto pb-10">
+                {/* <button
                     className="w-14 h-14 rounded-full flex items-center justify-center text-white bg-blue-600"
                     onClick={toggleSpeaker}
                 >
                     {isSpeakerEnabled
                         ? "Switch to Default"
                         : "Switch to Speakerphone"}
-                </button>
+                </button> */}
                 <button
                     className="w-14 h-14 rounded-full flex items-center justify-center bg-red-600"
                     onClick={endCall}
