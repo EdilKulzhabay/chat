@@ -229,7 +229,7 @@ export default function Chat() {
                                                     ) : (
                                                         <div className="w-7 h-7 rounded-full border flex items-center justify-center">
                                                             {item?.sender?.userName
-                                                                .charAt(0)
+                                                                ?.charAt(0)
                                                                 .toUpperCase()}
                                                         </div>
                                                     )}
@@ -246,7 +246,7 @@ export default function Chat() {
                                                     ) : (
                                                         <div className="w-7 h-7 rounded-full border flex items-center justify-center">
                                                             {item?.sender?.userName
-                                                                .charAt(0)
+                                                                ?.charAt(0)
                                                                 .toUpperCase()}
                                                         </div>
                                                     )}
@@ -275,7 +275,7 @@ export default function Chat() {
                                                     ) : (
                                                         <div className="w-7 h-7 rounded-full border flex items-center justify-center">
                                                             {userData?.userName
-                                                                .charAt(0)
+                                                                ?.charAt(0)
                                                                 .toUpperCase()}
                                                         </div>
                                                     )}
@@ -296,7 +296,7 @@ export default function Chat() {
                                                     ) : (
                                                         <div className="w-7 h-7 rounded-full border flex items-center justify-center">
                                                             {receiverData?.userName
-                                                                .charAt(0)
+                                                                ?.charAt(0)
                                                                 .toUpperCase()}
                                                         </div>
                                                     )}

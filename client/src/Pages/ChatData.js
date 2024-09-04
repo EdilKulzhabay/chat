@@ -66,7 +66,7 @@ export default function ChatData() {
                                             ) : (
                                                 <div className="w-10 h-10 rounded-full border flex items-center justify-center">
                                                     {item?.userName
-                                                        .charAt(0)
+                                                        ?.charAt(0)
                                                         .toUpperCase()}
                                                 </div>
                                             )}

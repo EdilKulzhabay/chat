@@ -128,7 +128,7 @@ export default function MainPage() {
                                                 ) : (
                                                     <div className="w-10 h-10 rounded-full flex border items-center justify-center">
                                                         {item.receiverUserName
-                                                            .charAt(0)
+                                                            ?.charAt(0)
                                                             .toUpperCase()}
                                                     </div>
                                                 )}
