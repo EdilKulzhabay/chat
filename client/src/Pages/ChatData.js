@@ -28,15 +28,6 @@ export default function ChatData() {
         }
     }, []);
 
-    function getInitials(fullName) {
-        if (!fullName) return "";
-        const names = fullName.split(" ");
-        const initials = names
-            .map((name) => name.charAt(0).toUpperCase())
-            .join("");
-        return initials;
-    }
-
     return (
         <>
             <CallComponent />
@@ -74,17 +65,14 @@ export default function ChatData() {
                                                 />
                                             ) : (
                                                 <div className="w-10 h-10 rounded-full border flex items-center justify-center">
-                                                    {getInitials(
-                                                        item?.fullName
-                                                    )}
+                                                    {item?.userName
+                                                        .charAt(0)
+                                                        .toUpperCase()}
                                                 </div>
                                             )}
                                         </div>
                                         <div className="ml-3">
                                             <div>{item.userName}</div>
-                                            <div className="text-sm">
-                                                {item.fullName}
-                                            </div>
                                         </div>
                                     </Link>
                                 </div>

@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 
 export const register = async (req, res) => {
     try {
-        const { userName, fullName, phone } = req.body;
+        const { userName } = req.body;
 
         const candidate = await User.findOne({ userName });
 
@@ -19,9 +19,7 @@ export const register = async (req, res) => {
 
         const doc = new User({
             userName,
-            fullName,
             password: hash,
-            phone,
         });
 
         const user = await doc.save();

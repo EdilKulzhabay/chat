@@ -3,22 +3,18 @@ import api from "../api";
 
 export default function AddUsers() {
     const [userName, setUserName] = useState("");
-    const [fullName, setFullName] = useState("");
     const [password, setPassword] = useState("");
-    const [phone, setPhone] = useState("");
 
     const addUser = () => {
         api.post(
             "/register",
-            { userName, fullName, password, phone },
+            { userName, password },
             {
                 headers: { "Content-Type": "application/json" },
             }
         ).then(() => {
             setUserName("");
-            setFullName("");
             setPassword("");
-            setPhone("");
         });
     };
 
@@ -36,32 +32,12 @@ export default function AddUsers() {
                     />
                 </div>
                 <div>
-                    FullName
-                    <input
-                        className="ml-2 outline-nonde border rounded-md "
-                        value={fullName}
-                        onChange={(e) => {
-                            setFullName(e.target.value);
-                        }}
-                    />
-                </div>
-                <div>
                     Password
                     <input
                         className="ml-2 outline-nonde border rounded-md "
                         value={password}
                         onChange={(e) => {
                             setPassword(e.target.value);
-                        }}
-                    />
-                </div>
-                <div>
-                    Phone
-                    <input
-                        className="ml-2 outline-nonde border rounded-md "
-                        value={phone}
-                        onChange={(e) => {
-                            setPhone(e.target.value);
                         }}
                     />
                 </div>

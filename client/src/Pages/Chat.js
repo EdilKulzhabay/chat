@@ -108,15 +108,6 @@ export default function Chat() {
         }
     }, [messages]);
 
-    function getInitials(fullName) {
-        if (!fullName) return "";
-        const names = fullName.split(" ");
-        const initials = names
-            .map((name) => name.charAt(0).toUpperCase())
-            .join("");
-        return initials;
-    }
-
     const startCall = () => {
         const recId = receiverData._id;
         const link = `/call/${v4()}`;
@@ -192,7 +183,9 @@ export default function Chat() {
                                     />
                                 ) : (
                                     <div className="w-10 h-10 rounded-full border flex items-center justify-center">
-                                        {getInitials(receiverData?.fullName)}
+                                        {receiverData?.userName
+                                            ?.charAt(0)
+                                            .toUpperCase()}
                                     </div>
                                 )}
                             </div>
@@ -235,10 +228,9 @@ export default function Chat() {
                                                         />
                                                     ) : (
                                                         <div className="w-7 h-7 rounded-full border flex items-center justify-center">
-                                                            {getInitials(
-                                                                item?.sender
-                                                                    ?.fullName
-                                                            )}
+                                                            {item?.sender?.userName
+                                                                .charAt(0)
+                                                                .toUpperCase()}
                                                         </div>
                                                     )}
                                                 </div>
@@ -253,10 +245,9 @@ export default function Chat() {
                                                         />
                                                     ) : (
                                                         <div className="w-7 h-7 rounded-full border flex items-center justify-center">
-                                                            {getInitials(
-                                                                item?.sender
-                                                                    ?.fullName
-                                                            )}
+                                                            {item?.sender?.userName
+                                                                .charAt(0)
+                                                                .toUpperCase()}
                                                         </div>
                                                     )}
                                                 </div>
@@ -283,9 +274,9 @@ export default function Chat() {
                                                         />
                                                     ) : (
                                                         <div className="w-7 h-7 rounded-full border flex items-center justify-center">
-                                                            {getInitials(
-                                                                userData?.fullName
-                                                            )}
+                                                            {userData?.userName
+                                                                .charAt(0)
+                                                                .toUpperCase()}
                                                         </div>
                                                     )}
                                                     <img
@@ -304,9 +295,9 @@ export default function Chat() {
                                                         />
                                                     ) : (
                                                         <div className="w-7 h-7 rounded-full border flex items-center justify-center">
-                                                            {getInitials(
-                                                                receiverData?.fullName
-                                                            )}
+                                                            {receiverData?.userName
+                                                                .charAt(0)
+                                                                .toUpperCase()}
                                                         </div>
                                                     )}
                                                 </div>

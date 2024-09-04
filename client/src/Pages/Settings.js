@@ -109,7 +109,7 @@ export default function Settings() {
                 </div>
             </div>
             <div className="mt-4 flex flex-col items-center justify-center">
-                <div className="text-lg font-medium ">{userData?.fullName}</div>
+                <div className="text-lg font-medium ">{userData?.userName}</div>
                 <div className="mt-1 text-sm font-medium ">
                     {userData?.phone}
                 </div>
