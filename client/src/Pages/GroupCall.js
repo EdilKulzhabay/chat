@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../api";
-import useWebRTC, { LOCAL_VIDEO } from "../hooks/useWebRTC";
+import useWebRTC, { LOCAL_AUDIO } from "../hooks/useWebRTC";
 import PhoneOutIcon from "../Icons/PhoneOutIcon";
 import socket from "../socket";
 
@@ -75,7 +75,7 @@ export default function GroupCall() {
                                 }}
                                 autoPlay
                                 playsInline
-                                muted={clientID === LOCAL_VIDEO}
+                                muted={clientID === LOCAL_AUDIO}
                             />
                         </div>
                     );

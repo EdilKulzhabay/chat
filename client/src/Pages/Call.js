@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import api from "../api";
-import useWebRTC, { LOCAL_VIDEO } from "../hooks/useWebRTC";
+import useWebRTC, { LOCAL_AUDIO } from "../hooks/useWebRTC";
 import PhoneOutIcon from "../Icons/PhoneOutIcon";
 // import SpeakerIcon from "../Icons/SpeakerIcon"; // Иконка для переключения динамика
 import socket from "../socket";
@@ -77,7 +77,7 @@ export default function Call() {
                                 }}
                                 autoPlay
                                 playsInline
-                                muted={clientID === LOCAL_VIDEO}
+                                muted={clientID === LOCAL_AUDIO}
                             />
                         </div>
                     );
