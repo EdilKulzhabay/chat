@@ -7,6 +7,7 @@ import multer from "multer";
 import cookieParser from "cookie-parser";
 import ACTIONS from "./client/src/socket/actions.js";
 import { validate, version } from "uuid";
+import CryptoJS from "crypto-js";
 import "dotenv/config";
 
 import { MessageController, UserController } from "./Controllers/index.js";
@@ -69,6 +70,20 @@ function shareRoomsInfo() {
     });
 }
 
+const encryptMessage = (message) => {
+    return CryptoJS.AES.encrypt(message, process.env.CRYPTO).toString();
+};
+
+const decryptMessage = (ciphertext) => {
+    try {
+        const bytes = CryptoJS.AES.decrypt(ciphertext, process.env.CRYPTO);
+        return bytes.toString(CryptoJS.enc.Utf8);
+    } catch (error) {
+        console.error("Error decrypting message:", error);
+        return ciphertext; // Возвращаем исходное сообщение, если не удается расшифровать
+    }
+};
+
 io.on("connection", (socket) => {
     socket.on("joinRoom", (room, userName) => {
         socket.join(room);
@@ -76,20 +91,35 @@ io.on("connection", (socket) => {
     });
 
     socket.on("sendMessage", async (message) => {
-        const newMessage = new Message(message);
+        // Шифрование содержимого сообщения перед сохранением
+        const encryptedContent = encryptMessage(message.content);
+
+        // Сохраняем зашифрованное сообщение в базу данных
+        const newMessage = new Message({
+            ...message,
+            content: encryptedContent,
+        });
         await newMessage.save();
 
         if (message.type === "group") {
             const populatedMessage = await Message.findById(
                 newMessage._id
             ).populate("sender");
+
+            // Расшифровываем сообщение перед отправкой
+            populatedMessage.content = decryptMessage(populatedMessage.content);
             io.emit("message", populatedMessage);
             socket.broadcast.emit("updateMessages");
         } else {
+            // Отправка зашифрованного сообщения между двумя пользователями
+            const decryptedMessage = {
+                ...newMessage.toObject(),
+                content: decryptMessage(newMessage.content),
+            };
             socket.nsp
                 .to(message.sender)
                 .to(message.receiver)
-                .emit("message", newMessage);
+                .emit("message", decryptedMessage);
             socket.to(message.receiver).emit("updateMessages");
         }
     });

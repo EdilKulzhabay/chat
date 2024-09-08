@@ -1,55 +1,56 @@
 import Message from "../Models/Message.js";
 import User from "../Models/User.js";
+import CryptoJS from "crypto-js";
+
+const decryptMessage = (ciphertext) => {
+    try {
+        const bytes = CryptoJS.AES.decrypt(ciphertext, process.env.CRYPTO);
+        return bytes.toString(CryptoJS.enc.Utf8);
+    } catch (error) {
+        console.error("Error decrypting message:", error);
+        return ciphertext; // Возвращаем исходное сообщение, если не удается расшифровать
+    }
+};
 
 export const getMessages = async (req, res) => {
     try {
         const id = req.userId;
-
         const { type, page, receiver } = req.body;
 
         const limit = 20;
         const skip = (page - 1) * limit;
 
-        if (type === "group") {
-            const messages = await Message.find({ type: "group" })
-                .populate("sender")
-                // .skip(skip)
-                // .limit(limit)
-                .sort({ createdAt: -1 });
+        let messages;
 
-            res.json({
-                messages,
-            });
+        if (type === "group") {
+            messages = await Message.find({ type: "group" })
+                .populate("sender")
+                .sort({ createdAt: -1 });
         } else {
-            const messages = await Message.find({
+            messages = await Message.find({
                 $or: [
                     { sender: id, receiver },
                     { sender: receiver, receiver: id },
                 ],
-            })
-                // .skip(skip)
-                // .limit(limit)
-                .sort({ createdAt: -1 });
-
-            res.json({
-                messages,
-            });
+            }).sort({ createdAt: -1 });
         }
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({
-            message: "Ошибка на стороне сервера",
+
+        // Расшифровка каждого сообщения с обработкой ошибок
+        const decryptedMessages = messages.map((message) => {
+            try {
+                return {
+                    ...message.toObject(),
+                    content: decryptMessage(message.content), // Попытка расшифровать
+                };
+            } catch (error) {
+                console.error("Failed to decrypt message:", error);
+                return message.toObject(); // Возвращаем как есть, если ошибка
+            }
         });
-    }
-};
 
-export const getChatData = async (req, res) => {
-    try {
-        const { type, receiver } = req.body;
-
-        if (type === "group") {
-        } else {
-        }
+        res.json({
+            messages: decryptedMessages,
+        });
     } catch (error) {
         console.log(error);
         res.status(500).json({
@@ -61,9 +62,7 @@ export const getChatData = async (req, res) => {
 export const getChats = async (req, res) => {
     try {
         const id = req.userId;
-
         const user = await User.findById(id);
-
         const userId = user._id;
 
         const chats = await Message.aggregate([
@@ -128,7 +127,13 @@ export const getChats = async (req, res) => {
             },
         ]);
 
-        res.json({ chats });
+        // Расшифровка последнего сообщения в каждом чате
+        const decryptedChats = chats.map((chat) => ({
+            ...chat,
+            lastMessage: decryptMessage(chat.lastMessage),
+        }));
+
+        res.json({ chats: decryptedChats });
     } catch (error) {
         console.log(error);
         res.status(500).json({

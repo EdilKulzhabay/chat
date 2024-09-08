@@ -120,16 +120,6 @@ export default function Chat() {
         navigation(link, { state: { isAnswer: false, companion: recId } });
     };
 
-    const startGrouopCall = () => {
-        const recName = userData.userName;
-        const link = `/groupCall/f5aa2211-c928-4f34-a8e4-d225e6b2a041`;
-        socket.emit("startGroupCall", {
-            recName: recName,
-        });
-
-        navigation(link);
-    };
-
     useEffect(() => {
         const textarea = textareaRef.current;
         textarea.style.height = "auto"; // Reset the height to auto
@@ -178,6 +168,7 @@ export default function Chat() {
                             <div className="w-10 h-10 rounded-full overflow-hidden">
                                 {receiverData.avatar ? (
                                     <img
+                                        alt="avatar"
                                         className="h-full"
                                         src={`${process.env.REACT_APP_PORT}/uploads/${receiverData.avatar}`}
                                     />
@@ -208,7 +199,10 @@ export default function Chat() {
                         </button>
                     )}
                 </div>
-                <div ref={chatRef} className="gap-y-2 py-3 px-2 chat-overflow">
+                <div
+                    ref={chatRef}
+                    className="gap-y-2 pt-[80px] pb-3 px-2 chat-overflow"
+                >
                     {messages &&
                         messages.length > 0 &&
                         messages.map((item) => {
@@ -223,6 +217,7 @@ export default function Chat() {
                                                 <div className="w-7 h-7 rounded-full overflow-hidden">
                                                     {item.sender.avatar ? (
                                                         <img
+                                                            alt="avatar"
                                                             className="h-full"
                                                             src={`${process.env.REACT_APP_PORT}/uploads/${item.sender.avatar}`}
                                                         />
@@ -240,6 +235,7 @@ export default function Chat() {
                                                 <div className="w-7 h-7 rounded-full overflow-hidden">
                                                     {item.sender.avatar ? (
                                                         <img
+                                                            alt="avatar"
                                                             className="h-full"
                                                             src={`${process.env.REACT_APP_PORT}/uploads/${item.sender.avatar}`}
                                                         />
@@ -269,6 +265,7 @@ export default function Chat() {
                                                 <div className="w-7 h-7 rounded-full overflow-hidden">
                                                     {userData.avatar ? (
                                                         <img
+                                                            alt="avatar"
                                                             className="h-full"
                                                             src={`${process.env.REACT_APP_PORT}/uploads/${userData.avatar}`}
                                                         />
@@ -280,6 +277,7 @@ export default function Chat() {
                                                         </div>
                                                     )}
                                                     <img
+                                                        alt="avatar"
                                                         className="h-full"
                                                         src={`${process.env.REACT_APP_PORT}/uploads/${userData.avatar}`}
                                                     />
@@ -290,6 +288,7 @@ export default function Chat() {
                                                 <div className="w-7 h-7 rounded-full overflow-hidden">
                                                     {receiverData.avatar ? (
                                                         <img
+                                                            alt="avatar"
                                                             className="h-full"
                                                             src={`${process.env.REACT_APP_PORT}/uploads/${receiverData.avatar}`}
                                                         />

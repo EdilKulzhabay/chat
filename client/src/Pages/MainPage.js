@@ -124,6 +124,7 @@ export default function MainPage() {
                                                     <img
                                                         className="h-full"
                                                         src={`${process.env.REACT_APP_PORT}/uploads/${item.receiverAvatar}`}
+                                                        alt="avatar"
                                                     />
                                                 ) : (
                                                     <div className="w-10 h-10 rounded-full flex border items-center justify-center">
@@ -135,6 +136,7 @@ export default function MainPage() {
                                                 <img
                                                     className="h-full"
                                                     src={`${process.env.REACT_APP_PORT}/uploads/${item.receiverAvatar}`}
+                                                    alt="avatar"
                                                 />
                                             </div>
                                             <div className="ml-3">
