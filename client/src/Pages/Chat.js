@@ -201,7 +201,7 @@ export default function Chat() {
                 </div>
                 <div
                     ref={chatRef}
-                    className="gap-y-2 mt-[72px] pb-3 px-2 chat-overflow"
+                    className="gap-y-2 pt-[80px] pb-3 px-2 chat-overflow"
                 >
                     {messages &&
                         messages.length > 0 &&
