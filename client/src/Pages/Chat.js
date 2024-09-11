@@ -199,10 +199,8 @@ export default function Chat() {
                         </button>
                     )}
                 </div>
-                <div
-                    ref={chatRef}
-                    className="gap-y-2 pt-[80px] pb-3 px-2 chat-overflow"
-                >
+                <div className="h-[80px]" />
+                <div ref={chatRef} className="gap-y-2 pb-3 px-2 chat-overflow">
                     {messages &&
                         messages.length > 0 &&
                         messages.map((item) => {
