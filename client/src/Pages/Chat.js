@@ -201,7 +201,7 @@ export default function Chat() {
                 </div>
                 <div
                     ref={chatRef}
-                    className="gap-y-2 pt-[80px] pb-3 px-2 chat-overflow"
+                    className="gap-y-2 mt-[72px] pb-3 px-2 chat-overflow"
                 >
                     {messages &&
                         messages.length > 0 &&
@@ -325,13 +325,13 @@ export default function Chat() {
                             style={{ overflowY: "scroll" }}
                         />
                     </div>
-                    <div className="ml-3">
+                    <div className="ml-3 -mt-1">
                         <button
                             type="submit"
-                            className="flex items-center justify-center w-7 h-7 rounded-full bg-purple-900 bg-opacity-50"
+                            className="flex items-center justify-center w-8 h-8 rounded-full bg-purple-900 bg-opacity-50"
                             disabled={message === ""}
                         >
-                            <SendIcon className="w-5 h-5" />
+                            <SendIcon className="w-6 h-6" />
                         </button>
                     </div>
                 </form>
