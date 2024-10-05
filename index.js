@@ -85,6 +85,9 @@ const decryptMessage = (ciphertext) => {
 };
 
 io.on("connection", (socket) => {
+    console.log("sldkvnsldkvmlsdfkmvlfdk");
+    
+
     socket.on("joinRoom", (room, userName) => {
         socket.join(room);
         console.log("user ", userName, " joined room ", room);
